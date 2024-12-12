@@ -2,7 +2,7 @@ var express = require('express');
 const Router = express.Router();
 const UserController = require("../../controller/client_controllers/client");
 const upload = require("../../utility/aws")
-const authMiddleware = require("../../middlewares/auth");
+const authMiddleware = require("../../middlewares/clientauth");
 
 const {
     login,

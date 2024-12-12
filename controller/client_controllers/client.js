@@ -2,7 +2,7 @@
 const { User } = require('../../models/client_model')
 const { Form } = require('../../models/form_model')
 const jwt = require("jsonwebtoken")
-const {Roles,Form_Types,Form_Status} = require("../../Helpers/constants")
+const {Roles,Form_Types,Form_Status,Plan_Status,Subscription_Status} = require("../../Helpers/constants")
 const {otp_code,hash} = require ("../../Helpers/helperFunction")
 const moment = require('moment');
 const JWT = require("jsonwebtoken");
@@ -142,7 +142,7 @@ exports.firstTimeForm = async (req, res) => {
 
           await Form.create(req.body)
           //update user 
-          await User.updateOne({ _id: client._id  },{isNewUser:false,})
+          await User.updateOne({ _id: client._id  },{subsctiption_status:Subscription_Status.NotStarted, isNewUser:false ,diet_plan_status:Plan_Status.FirstPlanNeeded,workout_plan_status:Plan_Status.FirstPlanNeeded})
     
       
       return res.status(200).json({ msg: "First Time Form submited" });

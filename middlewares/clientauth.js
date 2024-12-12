@@ -1,5 +1,6 @@
 const JWT = require("jsonwebtoken");
 const { User } = require("../models/client_model");
+const {Roles} = require("../Helpers/constants")
 
 module.exports = async (req, res, next) => {
   try {
@@ -13,6 +14,7 @@ module.exports = async (req, res, next) => {
     var decoded = JWT.verify(token, secret);
     let user = await User.findOne({
         _id: decoded.id,
+        role:Roles.client,
         isLogin:true 
     });
     if (!user) {

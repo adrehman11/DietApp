@@ -12,7 +12,11 @@ var UserSchema = new mongoose.Schema({
     otpCode_timestamp:{type:String,default:null},
     role:{type:String,default:null},
     passwordHash: { type: String},
-    email_verified:{type: Boolean,default:false}
+    email_verified:{type: Boolean,default:false},
+    coach_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Coach' },
+    diet_plan_status: {type: String,default :null},
+    workout_plan_status: {type: String,default :null},
+    subsctiption_status: {type: String,default :null},
 },
 { timestamps: true });
 
