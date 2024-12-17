@@ -126,10 +126,10 @@ exports.firstTimeForm = async (req, res) => {
                   ...req.files.bodyImages.map((file) => file.location)
                 );
               }
-            else
-            {
-                return res.status(400).json({ msg: "Bad Request, Body Image is missing" });
-            }
+            // else
+            // {
+            //     return res.status(400).json({ msg: "Bad Request, Body Image is missing" });
+            // }
             if (req.files.MRI_XRAY_CT?.length) {
                 req.body.workoutForm.MRI_XRAY_CT =req.files.MRI_XRAY_CT[0].location
               }
