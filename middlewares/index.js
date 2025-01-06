@@ -1,4 +1,5 @@
 const JOI = require("@hapi/joi");
+const {FoodMeals,FoodCategory,DietPlanStatus} = require("../Helpers/constants")
 
 const loginSchema = JOI.object().keys({
   email: JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
@@ -130,4 +131,112 @@ exports.FlatObjects = (req, res, next) => {
   });
   req.body = transformed;
   next()
+};
+
+const AddFoodItemsSchema = JOI.object().keys({
+  name: JOI.string().required(),
+  quantity: JOI.number().required(),
+  unit:JOI.string().required(),
+  calories:JOI.number().required(),
+  fat: JOI.number().required(),
+  protein:JOI.number().required(),
+  carbohydrates:JOI.number().required(),
+});
+
+exports.AddFoodItems = (req, res, next) => {
+  const result = AddFoodItemsSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+
+const AddFoodRecipeSchema = JOI.object().keys({
+  name: JOI.string().required(),
+  description: JOI.string().required(),
+  ingredients: JOI.array().items(
+    JOI.object({
+      foodItem:JOI.string().required(),
+      quantity:JOI.number().required().min(1)
+     })).min(1)
+});
+
+exports.AddFoodRecipe = (req, res, next) => {
+  const result = AddFoodRecipeSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const AllFoodItemsSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  limit: JOI.number().required(),
+  category: JOI.string().valid(FoodCategory.FoodItem, FoodCategory.Recipe, FoodCategory.Supplement).required()
+});
+
+exports.AllFoodItems = (req, res, next) => {
+  const result = AllFoodItemsSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const createDietPlanSchema = JOI.object().keys({
+  name: JOI.string().required(),
+  numberOfDays: JOI.number().required(),
+  client_id:JOI.string().required(),
+  status:JOI.string().valid(DietPlanStatus.Saved,DietPlanStatus.Active).required(),
+  meals: JOI.array().items(
+    JOI.object({
+      mealType:JOI.string().valid(FoodMeals.Breakfast, FoodMeals.Lunch, FoodMeals.Dinner, FoodMeals.Snack, FoodMeals.Pre_Workout, FoodMeals.Post_Workout).required(),
+      items:JOI.array().items(
+        JOI.object({
+          type:JOI.string().valid(FoodCategory.FoodItem, FoodCategory.Recipe, FoodCategory.Supplement).required(),
+          referenceId:JOI.string().required(),
+          quantity:JOI.number().required().min(1)
+         })).min(1)
+     })).min(1)
+});
+
+exports.createDietPlan = (req, res, next) => {
+  const result = createDietPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getAllDietPlansSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  limit: JOI.number().required(),
+  client_id:JOI.string().required(),
+});
+
+exports.getAllDietPlans = (req, res, next) => {
+  const result = getAllDietPlansSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getDietPlanIDSchema = JOI.object().keys({
+  dietPlanID: JOI.string().required(),
+});
+
+exports.getDietPlanID = (req, res, next) => {
+  const result = getDietPlanIDSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
 };

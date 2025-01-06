@@ -40,10 +40,43 @@ const Subscription_Status = {
  
 Object.freeze(Subscription_Status);
 
+const FoodMeals = {
+   Breakfast:"Breakfast",
+   Lunch:"Lunch",
+   Dinner:"Dinner",
+   Snack:"Snack",
+   Pre_Workout:"Pre-Workout",
+   Post_Workout:"Post-Workout"
+
+}
+ 
+Object.freeze(FoodMeals);
+
+const FoodCategory = {
+   FoodItem:"FoodItem",
+   Recipe:"FoodRecipe",
+   Supplement:"Supplement",
+}
+ 
+Object.freeze(FoodCategory);
+
+const DietPlanStatus = {
+   Saved:"Saved",
+   Active:"Active",
+   Expired:"Expired",
+}
+ 
+Object.freeze(DietPlanStatus);
+
+
+
  module.exports = {
     Roles,
     Form_Types,
     Form_Status,
     Plan_Status,
-    Subscription_Status
+    Subscription_Status,
+    FoodMeals,
+    FoodCategory,
+    DietPlanStatus
  }

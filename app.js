@@ -19,6 +19,7 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/client',require('./routes/client_module/client_routes') );
 app.use('/coach',require('./routes/coach_module/coach_routes') );
+app.use('/admin',require('./routes/admin_module/admin_routes') );
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

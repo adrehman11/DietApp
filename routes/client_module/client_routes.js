@@ -16,7 +16,8 @@ const {
   Router.post('/signup',signup,UserController.signup);
   Router.post('/verify/otp',otpCodeVerification,UserController.OtpCodeVerification);
   Router.post('/submit/Form', authMiddleware,upload.fields([{ name: 'bodyImages', maxCount: 3 }, { name: 'MRI_XRAY_CT', maxCount: 1 }]), FlatObjects, firstTimeForm, UserController.firstTimeForm);
-  
+  Router.get('/getActiveDietPlans',authMiddleware, UserController.getActiveDietPlan)
+
   module.exports = Router;
 
   
