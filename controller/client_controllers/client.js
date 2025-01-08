@@ -56,7 +56,7 @@ exports.signup = async function (req, res) {
 }
 exports.login = async function (req, res) {
   try {
-    let data = await User.findOne({ email: req.body.email, role: Roles.client })
+    let data = await User.findOne({ email: req.body.email, role: Roles.client }).lean()
     if (!data) {
       throw "No email found please signup"
     }
@@ -70,10 +70,10 @@ exports.login = async function (req, res) {
     const token = JWT.sign({
       id: data._id,
     }, secret, { expiresIn: '3650d' });
-
+    const { passwordHash, otpCode, otpCode_timestamp, ...updatedData } = data;
     //login work
     await User.updateOne({ _id: data._id }, { isLogin: true })
-    return res.status(200).json({ token: token, isNewUser: data.isNewUser });
+    return res.status(200).json({ token: token, isNewUser: data.isNewUser,userData:updatedData });
   }
   catch (err) {
     console.log(err)
@@ -152,7 +152,7 @@ exports.firstTimeForm = async (req, res) => {
 exports.getActiveDietPlan = async (req, res) => {
   try {
     let client = req.user
-    let data = await DietPlan.find({ client_id: client.id, status: DietPlanStatus.Active }).populate({
+    let data = await DietPlan.findOne({ client_id: client.id, status: DietPlanStatus.Active }).populate({
       path: 'meals.items.referenceId', options: { strictPopulate: false },
       populate: {
         path: 'ingredients.foodItem', // Field inside FoodRecipe to populate
@@ -166,18 +166,15 @@ exports.getActiveDietPlan = async (req, res) => {
       path: 'coach_id',
       select: '_id full_name email role U_ID',
     }).lean();
-
-    let dietPlansWithNutrients = calculateTotalNutrients(data);
-    return res.status(200).json(dietPlansWithNutrients)
+    let totalNutrients = await calculateTotalNutrientsForPlan(data);
+    let dietPlan = {
+        ...data,
+        totalNutrients
+    }
+    
+    return res.status(200).json(dietPlan)
   }
   catch (error) {
     return res.status(500).json({ msg: error.message });
   }
-}
-
-function calculateTotalNutrients(dietPlans) {
-  return dietPlans.map(plan => ({
-    ...plan, // Spread the original data of the plan
-    totalNutrients: calculateTotalNutrientsForPlan(plan) // Add the calculated total nutrients
-  }));
 }
