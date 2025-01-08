@@ -3,7 +3,7 @@ const { User } = require('../../models/client_model')
 const { Form } = require('../../models/form_model')
 const { DietPlan } = require('../../models/dietPlan_model')
 const jwt = require("jsonwebtoken")
-const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus } = require("../../Helpers/constants")
+const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus,FoodCategory } = require("../../Helpers/constants")
 const { otp_code, hash, calculateTotalNutrientsForPlan } = require("../../Helpers/helperFunction")
 const moment = require('moment');
 const JWT = require("jsonwebtoken");
@@ -171,6 +171,34 @@ exports.getActiveDietPlan = async (req, res) => {
         ...data,
         totalNutrients
     }
+    dietPlan.meals.forEach(meal => {
+      const totalNutrientsMeal = {
+        TotalCalories: 0,
+        TotalFat: 0,
+        TotalProtein: 0,
+        TotalCarbohydrates: 0
+      };
+    
+      meal.items.forEach(item => {
+        if (item.type === FoodCategory.FoodItem) {
+          const nutrients = item.referenceId;
+          totalNutrientsMeal.TotalCalories += (nutrients.calories * item.quantity) || 0;
+          totalNutrientsMeal.TotalFat += (nutrients.fat * item.quantity) || 0;
+          totalNutrientsMeal.TotalProtein += (nutrients.protein * item.quantity) || 0;
+          totalNutrientsMeal.TotalCarbohydrates += (nutrients.carbohydrates * item.quantity) || 0;
+        } else if (item.type === FoodCategory.Recipe) {
+          item.referenceId.ingredients.forEach(ingredient => {
+            const foodItem = ingredient.foodItem;
+            totalNutrientsMeal.TotalCalories += (foodItem.calories * ingredient.quantity) || 0;
+            totalNutrientsMeal.TotalFat += (foodItem.fat * ingredient.quantity) || 0;
+            totalNutrientsMeal.TotalProtein += (foodItem.protein * ingredient.quantity) || 0;
+            totalNutrientsMeal.TotalCarbohydrates += (foodItem.carbohydrates * ingredient.quantity) || 0;
+          });
+        }
+      });
+    
+      meal.totalMealNutrients = totalNutrientsMeal;
+    });
     
     return res.status(200).json(dietPlan)
   }
