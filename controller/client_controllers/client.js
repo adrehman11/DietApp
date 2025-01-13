@@ -2,6 +2,7 @@
 const { User } = require('../../models/client_model')
 const { Form } = require('../../models/form_model')
 const { DietPlan } = require('../../models/dietPlan_model')
+const {DietPlanTrack} = require("../../models/dietPlanMealTrack_model")
 const jwt = require("jsonwebtoken")
 const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus,FoodCategory } = require("../../Helpers/constants")
 const { otp_code, hash, calculateTotalNutrientsForPlan } = require("../../Helpers/helperFunction")
@@ -199,10 +200,72 @@ exports.getActiveDietPlan = async (req, res) => {
     
       meal.totalMealNutrients = totalNutrientsMeal;
     });
+    const startOfDay = moment().startOf('day').toDate();
+    const endOfDay = moment().endOf('day').toDate();
+    let completedMeals = await DietPlanTrack.find({
+      client_id: client.id,
+      dietPlan_id: data._id,
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+    });
+    const completedMealIds = completedMeals.map((meal) => meal.mealType);
+    const totalNutrientsTaken = {
+      TotalCalories: 0,
+      TotalFat: 0,
+      TotalProtein: 0,
+      TotalCarbohydrates: 0,
+    };
+    dietPlan.meals.forEach((meal) => {
+      // Determine meal status
+      if (completedMealIds.includes(meal.mealType)) {
+        meal.mealStatus = 'Completed';
+
+        // Add nutrients to total nutrients taken
+        totalNutrientsTaken.TotalCalories += meal.totalMealNutrients.TotalCalories || 0;
+        totalNutrientsTaken.TotalFat += meal.totalMealNutrients.TotalFat || 0;
+        totalNutrientsTaken.TotalProtein += meal.totalMealNutrients.TotalProtein || 0;
+        totalNutrientsTaken.TotalCarbohydrates += meal.totalMealNutrients.TotalCarbohydrates || 0;
+      } else {
+        meal.mealStatus = 'NotCompleted';
+      }
+    });
+
+    // Add total nutrients taken to the diet plan
+    dietPlan.totalNutrientsTaken = totalNutrientsTaken;
     
     return res.status(200).json(dietPlan)
   }
   catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+}
+exports.progressDietPlan = async (req, res) => {
+  try
+  {
+    req.body.client_id = req.user.id
+    const { meal_id, client_id } = req.body;
+
+    // Get the start of the current day
+    const startOfDay = moment().startOf('day').toDate();
+    const endOfDay = moment().endOf('day').toDate();
+
+    // Check if the meal_id already exists for today
+    const existingMeal = await DietPlanTrack.findOne({
+      client_id,
+      meal_id: meal_id,
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
+    });
+
+    if (existingMeal) {
+      return res.status(400).json({ msg: 'This meal has already been logged for today.' });
+    }
+
+    // Proceed to create a new record
+    await DietPlanTrack.create(req.body);
+
+    return res.status(200).json({msg:"updated"})
+  }
+  catch(error)
+  {
     return res.status(500).json({ msg: error.message });
   }
 }

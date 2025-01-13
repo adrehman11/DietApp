@@ -240,3 +240,32 @@ exports.getDietPlanID = (req, res, next) => {
     next();
   }
 };
+
+const completeMealSchema = JOI.object().keys({
+  mealType:JOI.string().valid(FoodMeals.Breakfast, FoodMeals.Lunch, FoodMeals.Dinner, FoodMeals.Snack, FoodMeals.Pre_Workout, FoodMeals.Post_Workout).required(),
+  items:JOI.array().items(
+    JOI.object({
+      type:JOI.string().valid(FoodCategory.FoodItem, FoodCategory.Recipe, FoodCategory.Supplement).required(),
+      referenceId:JOI.string().required(),
+      quantity:JOI.number().required().min(1)
+      })).min(1),
+  meal_id:JOI.string().required(),
+  totalMealNutrients: JOI.object({
+    TotalCalories: JOI.number().required(),
+    TotalFat: JOI.number().required(),
+    TotalProtein: JOI.number().required(),
+    TotalCarbohydrates:JOI.number().required(),
+  }),
+  dietPlan_id: JOI.string().required(),
+})
+
+
+
+exports.completeMeal = (req, res, next) => {
+  const result = completeMealSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
