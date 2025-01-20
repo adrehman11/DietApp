@@ -28,6 +28,7 @@ var DietPlanSchema = new mongoose.Schema({
     status:{ type: String, required: true }, 
     client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
     coach_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Coach' },
+    coach_notes:{type: String}
 },
 { timestamps: true });
 

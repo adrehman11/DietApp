@@ -1,6 +1,5 @@
 
 var mongoose = require('mongoose');
-// const {FoodMeals,FoodCategory} = require("../Helpers/constants")
 const {DietApp} = require('../utility/connection');
 var WorkoutPlanSchema = new mongoose.Schema({
     name: { type: String, required: true }, 
@@ -8,15 +7,15 @@ var WorkoutPlanSchema = new mongoose.Schema({
     exercises: [
         {
             day: {
-                name: String,
-                // enum: [FoodMeals.Breakfast, FoodMeals.Lunch, FoodMeals.Dinner, FoodMeals.Snack, FoodMeals.Pre_Workout, FoodMeals.Post_Workout],
+                type: String,
                 required: true,
             }, 
-            strength:[
-                {
-                    exercise_name : { name: String,required: true},
+            strength:{
+                    WorkoutName : { type: String,required: true},
                     exercise_details:[
                         {
+                            exercise_name:{type:String,required:true},
+                            Set:{type:String,required:true},
                             RIR:{type:String,required:true},
                             Tempo:{type:String,required:true},
                             Rest:{type:String,required:true},
@@ -24,32 +23,18 @@ var WorkoutPlanSchema = new mongoose.Schema({
                             Reps:{type:String,required:true}
                         }
                     ]
-                }
-
-            ],
-            cardio:[
-
-            ],
-            items: [
-                {
-                    type: { 
-                        type: String, 
-                        enum: [FoodCategory.FoodItem, FoodCategory.Recipe],  //FoodCategory.Supplement
-                        required: true 
-                    },
-                    referenceId: { type: mongoose.Schema.Types.ObjectId, refPath: 'meals.items.type', required: true },
-                    quantity:{type:Number,required:true}
                 },
-            ],
+            cardio:{type:String}
         },
     ],
     status:{ type: String, required: true }, 
     client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
     coach_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Coach' },
+    coach_notes:{type: String}
 },
 { timestamps: true });
 
-const WorkoutPlan = DietApp.model('workoutPlan', WorkoutPlanSchema);
+const WorkoutPlan = DietApp.model('WorkoutPlan', WorkoutPlanSchema);
 module.exports = {
     WorkoutPlan
 };

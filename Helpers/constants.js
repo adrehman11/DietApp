@@ -68,6 +68,20 @@ const DietPlanStatus = {
  
 Object.freeze(DietPlanStatus);
 
+const WorkoutPlanStatus = {
+   Saved:"Saved",
+   Active:"Active",
+   Expired:"Expired",
+}
+ 
+Object.freeze(WorkoutPlanStatus);
+
+const ScheduleCheckInType = {
+   Diet:"Diet",
+   Workout:"Workout",
+}
+ 
+Object.freeze(ScheduleCheckInType);
 
 
  module.exports = {
@@ -78,5 +92,7 @@ Object.freeze(DietPlanStatus);
     Subscription_Status,
     FoodMeals,
     FoodCategory,
-    DietPlanStatus
+    DietPlanStatus,
+    WorkoutPlanStatus,
+    ScheduleCheckInType
  }

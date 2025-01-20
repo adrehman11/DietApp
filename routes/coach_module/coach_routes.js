@@ -11,7 +11,11 @@ const {
     AllFoodItems,
     createDietPlan,
     getAllDietPlans,
-    getDietPlanID
+    getDietPlanID,
+    AllWorkoutExercise,
+    createWorkoutPlan,
+    getAllWorkoutPlans,
+    getWorkoutPlanID
   } = require("../../middlewares/index");
 
 
@@ -25,6 +29,16 @@ const {
   Router.post('/create/DietPlan',authMiddleware,createDietPlan,Coach_Plans.createDietPlan);
   Router.post('/get/DietPlans',authMiddleware,getAllDietPlans,Coach_Plans.getAllDietPlans);
   Router.post('/get/DietPlanById',authMiddleware,getDietPlanID,Coach_Plans.getDietPlanById);
+
+  //Workout Plan Apis
+
+  Router.post('/get/workoutExercises',authMiddleware,AllWorkoutExercise,Coach_Plans.getAllWorkoutExercises);
+  Router.post('/create/workoutPlan',authMiddleware,createWorkoutPlan,Coach_Plans.createWorkoutPlan);
+  Router.post('/get/workoutPlan',authMiddleware,getAllWorkoutPlans,Coach_Plans.getAllWorkoutplan);
+  Router.post('/get/workoutPlanById',authMiddleware,getWorkoutPlanID,Coach_Plans.getWorkoutplanById);
+
+
+
   
   
   module.exports = Router;
