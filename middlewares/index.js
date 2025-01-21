@@ -376,3 +376,31 @@ exports.getWorkoutPlanID = (req, res, next) => {
     next();
   }
 };
+
+const getAllClientsByFilterSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  type:JOI.string().required(),
+  filter:JOI.string().allow("")
+});
+
+exports.getAllClientsByFilter = (req, res, next) => {
+  const result = getAllClientsByFilterSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const getClientByIdSchema = JOI.object().keys({
+  client_id: JOI.string().required(),
+});
+
+exports.getClientById = (req, res, next) => {
+  const result = getClientByIdSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};

@@ -9,6 +9,8 @@ const authMiddleware = require("../../middlewares/coachauth");
 const {
     login, 
     AllFoodItems,
+    getAllClientsByFilter,
+    getClientById,
     createDietPlan,
     getAllDietPlans,
     getDietPlanID,
@@ -20,7 +22,8 @@ const {
 
 
   Router.post('/login',login,CoachController.login);
-  Router.post('/getAllClientsByFilter',authMiddleware,Coach_client_Controller.getClientsByFilter);
+  Router.post('/getAllClientsByFilter',authMiddleware,getAllClientsByFilter,Coach_client_Controller.getClientsByFilter);
+  Router.post('/getClientById',authMiddleware,getClientById,Coach_client_Controller.getClientById);
 
   
   //Diet Plan Apis

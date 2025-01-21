@@ -301,3 +301,31 @@ exports.getClientsByFilter = async function (req, res) {
 
 
 }
+
+exports.getClientById = async function (req, res) {
+    try {
+        const coach = req.user
+    
+            const users = await User.findOne({ _id: req.body.client_id })
+                .select('full_name diet_plan_status workout_plan_status subsctiption_status')
+                .lean()
+
+            const forms = await Form.findOne({ client_id:req.body.client_id }).lean()
+            const responseData =  {
+                ...users,
+                formData:forms
+            }
+
+            return res.status(200).json(responseData);
+        
+        
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).json(err)
+    }
+
+
+
+
+}
