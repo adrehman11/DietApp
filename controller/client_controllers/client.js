@@ -167,6 +167,10 @@ exports.getActiveDietPlan = async (req, res) => {
       path: 'coach_id',
       select: '_id full_name email role U_ID',
     }).lean();
+    if(!data)
+    {
+      return res.status(400).json({ msg: "No Data Found" });
+    }
     let totalNutrients = await calculateTotalNutrientsForPlan(data);
     let dietPlan = {
         ...data,
