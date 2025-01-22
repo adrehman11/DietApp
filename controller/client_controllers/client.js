@@ -2,9 +2,11 @@
 const { User } = require('../../models/client_model')
 const { Form } = require('../../models/form_model')
 const { DietPlan } = require('../../models/dietPlan_model')
+const { WorkoutPlan } = require('../../models/workoutPlan_model')
 const {DietPlanTrack} = require("../../models/dietPlanMealTrack_model")
+const{ScheduleCheckIn}= require("../../models/scheduleCheckIn_model")
 const jwt = require("jsonwebtoken")
-const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus,FoodCategory } = require("../../Helpers/constants")
+const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus,FoodCategory,WorkoutPlanStatus } = require("../../Helpers/constants")
 const { otp_code, hash, calculateTotalNutrientsForPlan } = require("../../Helpers/helperFunction")
 const moment = require('moment');
 const JWT = require("jsonwebtoken");
@@ -271,5 +273,39 @@ exports.progressDietPlan = async (req, res) => {
   catch(error)
   {
     return res.status(500).json({ msg: error.message });
+  }
+}
+exports.getActiveWorkoutPlan = async (req, res) => {
+  try {
+    let client = req.user
+    let data = await WorkoutPlan.findOne({ client_id: client.id, status: WorkoutPlanStatus.Active }).populate({
+      path: 'client_id',
+      select: '_id full_name email role diet_plan_status workout_plan_status subsctiption_status',
+    }).populate({
+      path: 'coach_id',
+      select: '_id full_name email role U_ID',
+    }).lean();
+    if(!data)
+    {
+      return res.status(400).json({ msg: "No Data Found" });
+    }
+   
+    
+    return res.status(200).json(data)
+  }
+  catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+}
+
+exports.getScheduleCheckInByType = async function (req, res) {
+  try {
+      let client = req.user
+      let data = await ScheduleCheckIn.find({client_id:client._id,type:req.body.type})
+      res.status(200).json(data)
+  }
+  catch (err) {
+      console.log(err)
+      res.status(500).json(err)
   }
 }

@@ -10,7 +10,8 @@ const {
     otpCodeVerification,
     firstTimeForm,
     FlatObjects,
-    completeMeal
+    completeMeal,
+    scheduleCheckInByType
   } = require("../../middlewares/index");
 
   Router.post('/login',login,UserController.login);
@@ -19,6 +20,17 @@ const {
   Router.post('/submit/Form', authMiddleware,upload.fields([{ name: 'bodyImages', maxCount: 3 }, { name: 'MRI_XRAY_CT', maxCount: 1 }]), FlatObjects, firstTimeForm, UserController.firstTimeForm);
   Router.get('/getActiveDietPlans',authMiddleware, UserController.getActiveDietPlan)
   Router.post('/completeMeal',authMiddleware,completeMeal, UserController.progressDietPlan)
+
+
+  //workoutplan
+  Router.get('/getActiveWorkoutPlan',authMiddleware, UserController.getActiveWorkoutPlan)
+
+
+  //scheduleCheckIn
+  Router.post('/getScheduleCheckInByType',authMiddleware,scheduleCheckInByType, UserController.getScheduleCheckInByType)
+  // Router.post('/scheduleCheckIN',authMiddleware,scheduleCheckInByType, UserController.getScheduleCheckInByType)
+
+
 
   module.exports = Router;
 

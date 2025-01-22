@@ -1,5 +1,5 @@
 const JOI = require("@hapi/joi");
-const { FoodMeals, FoodCategory, DietPlanStatus } = require("../Helpers/constants")
+const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType } = require("../Helpers/constants")
 
 const loginSchema = JOI.object().keys({
   email: JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
@@ -202,7 +202,8 @@ const createDietPlanSchema = JOI.object().keys({
           type: JOI.string().valid(FoodCategory.FoodItem, FoodCategory.Recipe, FoodCategory.Supplement).required(),
           referenceId: JOI.string().required(),
           quantity: JOI.number().required().min(1)
-        })).min(1)
+        })).min(1),
+      coach_notes_meals:JOI.string().allow(),
     })).min(1)
 });
 
@@ -214,6 +215,34 @@ exports.createDietPlan = (req, res, next) => {
     next();
   }
 };
+const editDietPlanSchema = JOI.object().keys({
+  id:JOI.string().required(),
+  name: JOI.string().required(),
+  numberOfDays: JOI.number().required(),
+  status: JOI.string().valid(DietPlanStatus.Saved, DietPlanStatus.Active).required(),
+  coach_notes: JOI.string().allow(),
+  meals: JOI.array().items(
+    JOI.object({
+      mealType: JOI.string().valid(FoodMeals.Breakfast, FoodMeals.Lunch, FoodMeals.Dinner, FoodMeals.Snack, FoodMeals.Pre_Workout, FoodMeals.Post_Workout).required(),
+      items: JOI.array().items(
+        JOI.object({
+          type: JOI.string().valid(FoodCategory.FoodItem, FoodCategory.Recipe, FoodCategory.Supplement).required(),
+          referenceId: JOI.string().required(),
+          quantity: JOI.number().required().min(1)
+        })).min(1),
+      coach_notes_meals:JOI.string().allow(),
+    })).min(1)
+});
+
+exports.editDietPlan = (req, res, next) => {
+  const result = editDietPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
 
 const getAllDietPlansSchema = JOI.object().keys({
   page: JOI.number().required(),
@@ -348,6 +377,42 @@ exports.createWorkoutPlan = (req, res, next) => {
     next();
   }
 };
+const editWorkoutPlanSchema = JOI.object().keys({
+  name: JOI.string().required(),
+  id:JOI.string().required(),
+  numberOfweeks: JOI.number().required(),
+  exercises: JOI.array().items(
+    JOI.object({
+      day: JOI.string().required(),
+      strength: JOI.object({
+        WorkoutName: JOI.string().required(),
+        exercise_details: JOI.array().items(
+          JOI.object({
+            exercise_name: JOI.string().required(),
+            Set: JOI.string().required(),
+            RIR: JOI.string().required(),
+            Tempo: JOI.string().required(),
+            Rest: JOI.string().required(),
+            Kg: JOI.string().required(),
+            Reps: JOI.string().required()
+          })).min(1)
+      }),
+      cardio: JOI.string().required(),
+    })).min(1),
+  status: JOI.string().required(),
+  coach_notes: JOI.string().required()
+});
+
+exports.editWorkoutPlan = (req, res, next) => {
+  const result = editWorkoutPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+
 
 const getAllWorkoutPlansSchema = JOI.object().keys({
   page: JOI.number().required(),
@@ -404,3 +469,53 @@ exports.getClientById = (req, res, next) => {
     next();
   }
 };
+exports.getAllClientsByFilter = (req, res, next) => {
+  const result = getAllClientsByFilterSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const scheduleChekcInSchema = JOI.object().keys({
+  date: JOI.string().required(),
+  type:JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
+  client_id: JOI.string().required(),
+
+});
+
+exports.scheduleChekcIn = (req, res, next) => {
+  const result = scheduleChekcInSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getAllScheduleChekcInSchema = JOI.object().keys({
+  startDate: JOI.string().required(),
+  endDate:JOI.string().required(),
+});
+
+exports.getAllScheduleChekcIn = (req, res, next) => {
+  const result = getAllScheduleChekcInSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const scheduleCheckInByTypeSchema = JOI.object().keys({
+  type: JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
+});
+
+exports.scheduleCheckInByType = (req, res, next) => {
+  const result = scheduleCheckInByTypeSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+

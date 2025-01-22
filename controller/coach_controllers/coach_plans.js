@@ -86,6 +86,36 @@ exports.createDietPlan=  async function (req, res) {
         res.status(500).json(err)
     }
 }
+exports.editDietPlan=  async function (req, res) {
+    try {
+        let client = req.user
+        const { id } = req.body; 
+        const updateData = req.body; 
+        if(req.body.status == DietPlanStatus.Saved)
+        {
+            req.body.status = DietPlanStatus.Saved
+        }
+        else if(req.body.status == DietPlanStatus.Active)
+        {
+            req.body.status = DietPlanStatus.Active
+        }
+        else
+        {
+            res.status(401).json({message:"Please Provide status"})
+        }
+        const updatedDietPlan = await DietPlan.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { new: true, runValidators: true }  // Return updated document and run schema validation
+        );
+        res.status(200).json({message:"Diet plan updated",updatedDietPlan})
+
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).json(err)
+    }
+}
 exports.getAllDietPlans=  async function (req, res) {
     try {
         let coach = req.user
@@ -200,6 +230,36 @@ exports.createWorkoutPlan=  async function (req, res) {
         }
         await WorkoutPlan.create(req.body)
         res.status(200).json({message:"Workout plan created"})
+
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).json(err)
+    }
+}
+exports.editWorkoutPlan=  async function (req, res) {
+    try {
+        let coach = req.user
+        const { id } = req.body; 
+        const updateData = req.body;
+        if(req.body.status == WorkoutPlanStatus.Saved)
+        {
+            req.body.status = WorkoutPlanStatus.Saved
+        }
+        else if(req.body.status == WorkoutPlanStatus.Active)
+        {
+            req.body.status = WorkoutPlanStatus.Active
+        }
+        else
+        {
+            res.status(401).json({message:"Please Provide status"})
+        } 
+        const updatedWorkOutPlan = await WorkoutPlan.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { new: true, runValidators: true }  // Return updated document and run schema validation
+        );
+        res.status(200).json({message:"Workout plan Edited",updatedWorkOutPlan})
 
     }
     catch (err) {

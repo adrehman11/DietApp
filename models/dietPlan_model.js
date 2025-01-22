@@ -23,6 +23,7 @@ var DietPlanSchema = new mongoose.Schema({
                     quantity:{type:Number,required:true}
                 },
             ],
+            coach_notes_meals:{type: String}
         },
     ],
     status:{ type: String, required: true }, 
