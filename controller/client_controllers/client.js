@@ -3,10 +3,11 @@ const { User } = require('../../models/client_model')
 const { Form } = require('../../models/form_model')
 const { DietPlan } = require('../../models/dietPlan_model')
 const { WorkoutPlan } = require('../../models/workoutPlan_model')
-const {DietPlanTrack} = require("../../models/dietPlanMealTrack_model")
-const{ScheduleCheckIn}= require("../../models/scheduleCheckIn_model")
+const { DietPlanTrack } = require("../../models/dietPlanMealTrack_model")
+const { ScheduleCheckIn } = require("../../models/scheduleCheckIn_model")
+const { WorkoutPlanTrack } = require("../../models/workoutTrack_model")
 const jwt = require("jsonwebtoken")
-const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus,FoodCategory,WorkoutPlanStatus } = require("../../Helpers/constants")
+const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus, FoodCategory, WorkoutPlanStatus } = require("../../Helpers/constants")
 const { otp_code, hash, calculateTotalNutrientsForPlan } = require("../../Helpers/helperFunction")
 const moment = require('moment');
 const JWT = require("jsonwebtoken");
@@ -76,7 +77,7 @@ exports.login = async function (req, res) {
     const { passwordHash, otpCode, otpCode_timestamp, ...updatedData } = data;
     //login work
     await User.updateOne({ _id: data._id }, { isLogin: true })
-    return res.status(200).json({ token: token, isNewUser: data.isNewUser,userData:updatedData });
+    return res.status(200).json({ token: token, isNewUser: data.isNewUser, userData: updatedData });
   }
   catch (err) {
     console.log(err)
@@ -169,14 +170,13 @@ exports.getActiveDietPlan = async (req, res) => {
       path: 'coach_id',
       select: '_id full_name email role U_ID',
     }).lean();
-    if(!data)
-    {
+    if (!data) {
       return res.status(400).json({ msg: "No Data Found" });
     }
     let totalNutrients = await calculateTotalNutrientsForPlan(data);
     let dietPlan = {
-        ...data,
-        totalNutrients
+      ...data,
+      totalNutrients
     }
     dietPlan.meals.forEach(meal => {
       const totalNutrientsMeal = {
@@ -185,7 +185,7 @@ exports.getActiveDietPlan = async (req, res) => {
         TotalProtein: 0,
         TotalCarbohydrates: 0
       };
-    
+
       meal.items.forEach(item => {
         if (item.type === FoodCategory.FoodItem) {
           const nutrients = item.referenceId;
@@ -203,7 +203,7 @@ exports.getActiveDietPlan = async (req, res) => {
           });
         }
       });
-    
+
       meal.totalMealNutrients = totalNutrientsMeal;
     });
     const startOfDay = moment().startOf('day').toDate();
@@ -237,7 +237,7 @@ exports.getActiveDietPlan = async (req, res) => {
 
     // Add total nutrients taken to the diet plan
     dietPlan.totalNutrientsTaken = totalNutrientsTaken;
-    
+
     return res.status(200).json(dietPlan)
   }
   catch (error) {
@@ -245,8 +245,7 @@ exports.getActiveDietPlan = async (req, res) => {
   }
 }
 exports.progressDietPlan = async (req, res) => {
-  try
-  {
+  try {
     req.body.client_id = req.user.id
     const { meal_id, client_id } = req.body;
 
@@ -268,10 +267,9 @@ exports.progressDietPlan = async (req, res) => {
     // Proceed to create a new record
     await DietPlanTrack.create(req.body);
 
-    return res.status(200).json({msg:"updated"})
+    return res.status(200).json({ msg: "updated" })
   }
-  catch(error)
-  {
+  catch (error) {
     return res.status(500).json({ msg: error.message });
   }
 }
@@ -285,27 +283,63 @@ exports.getActiveWorkoutPlan = async (req, res) => {
       path: 'coach_id',
       select: '_id full_name email role U_ID',
     }).lean();
-    if(!data)
-    {
+    if (!data) {
       return res.status(400).json({ msg: "No Data Found" });
     }
-   
-    
+    const completedExercises = await WorkoutPlanTrack.find({
+      client_id: client.id,
+      workoutPlan_id: data._id
+    }).select('exercise_details_id');
+    const completedExerciseIds = completedExercises.map(item => item.exercise_details_id);
+    data.exercises.forEach((exercise) => {
+      exercise.strength.exercise_details.forEach((detail) => {
+        detail.workoutDetails.forEach((workout) => {
+          workout.completed = completedExerciseIds.includes(workout._id.toString());
+        });
+      });
+    });
+
     return res.status(200).json(data)
   }
   catch (error) {
     return res.status(500).json({ msg: error.message });
   }
 }
+exports.completeWorkoutExercise = async (req, res) => {
+  try {
+    let client = req.user
+    const existingTrack = await WorkoutPlanTrack.findOne({
+      client_id: client._id,
+      workoutPlan_id: req.body.workoutPlan_id,
+      exercise_details_id: req.body.exercise_details_id
+    });
+
+    if (existingTrack) {
+      return res.status(400).json({ message: 'Exercise already marked as completed' });
+    }
+
+    // Create new tracking record
+    const track = new WorkoutPlanTrack({ client_id: client._id, workoutPlan_id: req.body.workoutPlan_id, exercise_details_id: req.body.exercise_details_id });
+    await track.save();
+
+    res.status(201).json({ message: 'Workout tracked successfully', track });
+
+    return
+  }
+  catch (error) {
+    return res.status(500).json({ msg: error.message });
+  }
+}
+
 
 exports.getScheduleCheckInByType = async function (req, res) {
   try {
-      let client = req.user
-      let data = await ScheduleCheckIn.find({client_id:client._id,type:req.body.type})
-      res.status(200).json(data)
+    let client = req.user
+    let data = await ScheduleCheckIn.find({ client_id: client._id, type: req.body.type })
+    res.status(200).json(data)
   }
   catch (err) {
-      console.log(err)
-      res.status(500).json(err)
+    console.log(err)
+    res.status(500).json(err)
   }
 }

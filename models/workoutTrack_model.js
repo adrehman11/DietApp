@@ -4,6 +4,8 @@ const {DietApp} = require('../utility/connection');
 var WorkoutPlanTrackSchema = new mongoose.Schema({
     client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
     workoutPlan_id: { type: mongoose.Schema.Types.ObjectId, ref: 'WorkoutPlan' },
+    exercise_details_id:{type:String , required:true},
+    
 },
 { timestamps: true });
 

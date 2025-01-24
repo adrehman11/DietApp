@@ -15,12 +15,17 @@ var WorkoutPlanSchema = new mongoose.Schema({
                     exercise_details:[
                         {
                             exercise_name:{type:String,required:true},
-                            Set:{type:String,required:true},
-                            RIR:{type:String,required:true},
-                            Tempo:{type:String,required:true},
-                            Rest:{type:String,required:true},
-                            Kg:{type:String,required:true},
-                            Reps:{type:String,required:true}
+                            workoutDetails:[
+                                {
+                                    Set:{type:String,required:true},
+                                    RIR:{type:String,required:true},
+                                    Tempo:{type:String,required:true},
+                                    Rest:{type:String,required:true},
+                                    Kg:{type:String,required:true},
+                                    Reps:{type:String,required:true}
+                                }
+                            ]
+                           
                         }
                     ]
                 },

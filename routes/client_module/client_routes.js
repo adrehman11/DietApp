@@ -25,7 +25,7 @@ const {
 
   //workoutplan
   Router.get('/getActiveWorkoutPlan',authMiddleware, UserController.getActiveWorkoutPlan)
-  // Router.post('/completeExercise',authMiddleware,completeExercise, UserController)
+  Router.post('/completeExercise',authMiddleware,completeExercise, UserController.completeWorkoutExercise)
 
 
 
