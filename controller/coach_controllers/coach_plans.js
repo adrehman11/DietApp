@@ -4,6 +4,7 @@ const { FoodRecipe } = require('../../models/foodRecipe_model')
 const { DietPlan } = require('../../models/dietPlan_model')
 const { WorkoutExercise } = require('../../models/workout_exercises_model')
 const { WorkoutPlan } = require('../../models/workoutPlan_model')
+const { Form } = require('../../models/form_model')
 const {FoodMeals,FoodCategory,DietPlanStatus,WorkoutPlanStatus} = require("../../Helpers/constants")
 const {calculateTotalNutrientsForPlan} = require("../../Helpers/helperFunction")
 const JWT = require("jsonwebtoken");
@@ -137,6 +138,10 @@ exports.getAllDietPlans=  async function (req, res) {
         select: '_id full_name email role U_ID',
     }).lean();
 
+    for (let plan of data) {
+        let formData = await Form.findOne({ client_id: plan.client_id._id }).lean();
+        plan.client_id.form = formData || {};  // Attach form data to client
+    }
         let dietPlansWithNutrients = calculateTotalNutrients(data);
 
 

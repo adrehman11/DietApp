@@ -300,6 +300,22 @@ exports.completeMeal = (req, res, next) => {
     next();
   }
 };
+const completeExerciseSchema = JOI.object().keys({
+  exercise_details_id: JOI.string().required(),
+  workoutPlan_id: JOI.string().required(),
+})
+
+
+
+exports.completeExercise = (req, res, next) => {
+  const result = completeExerciseSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
 
 
 const addWorkoutExerciseSchema = JOI.object().keys({

@@ -11,7 +11,8 @@ const {
     firstTimeForm,
     FlatObjects,
     completeMeal,
-    scheduleCheckInByType
+    scheduleCheckInByType,
+    completeExercise
   } = require("../../middlewares/index");
 
   Router.post('/login',login,UserController.login);
@@ -24,6 +25,8 @@ const {
 
   //workoutplan
   Router.get('/getActiveWorkoutPlan',authMiddleware, UserController.getActiveWorkoutPlan)
+  // Router.post('/completeExercise',authMiddleware,completeExercise, UserController)
+
 
 
   //scheduleCheckIn
