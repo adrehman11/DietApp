@@ -172,7 +172,7 @@ exports.getActiveDietPlan = async (req, res) => {
       select: '_id full_name email role U_ID',
     }).lean();
     if (!data) {
-      return res.status(400).json({ msg: "No Data Found" });
+      return res.status(200).json({data:[]});
     }
     let totalNutrients = await calculateTotalNutrientsForPlan(data);
     let dietPlan = {
