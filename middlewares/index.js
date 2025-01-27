@@ -496,15 +496,15 @@ exports.getAllClientsByFilter = (req, res, next) => {
     next();
   }
 };
-const scheduleChekcInSchema = JOI.object().keys({
+const scheduleCheckInInSchema = JOI.object().keys({
   date: JOI.string().required(),
   type:JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
   client_id: JOI.string().required(),
 
 });
 
-exports.scheduleChekcIn = (req, res, next) => {
-  const result = scheduleChekcInSchema.validate(req.body);
+exports.scheduleCheckIn = (req, res, next) => {
+  const result = scheduleCheckInInSchema.validate(req.body);
   if (result.error) {
     return res.status(400).json({ msg: result.error.message });
   } else {
@@ -512,13 +512,13 @@ exports.scheduleChekcIn = (req, res, next) => {
   }
 };
 
-const getAllScheduleChekcInSchema = JOI.object().keys({
+const getAllScheduleCheckInSchema = JOI.object().keys({
   startDate: JOI.string().required(),
   endDate:JOI.string().required(),
 });
 
-exports.getAllScheduleChekcIn = (req, res, next) => {
-  const result = getAllScheduleChekcInSchema.validate(req.body);
+exports.getAllScheduleCheckIn = (req, res, next) => {
+  const result = getAllScheduleCheckInSchema.validate(req.body);
   if (result.error) {
     return res.status(400).json({ msg: result.error.message });
   } else {
@@ -537,4 +537,55 @@ exports.scheduleCheckInByType = (req, res, next) => {
     next();
   }
 };
+
+
+const scheduleCheckInTrackDietSchema = JOI.object().keys({
+  schedule_id:JOI.string().required(),
+    // client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
+    committementLevel :JOI.string().allow(),
+    weight :JOI.string().allow(),
+    // bodyImages:JOI.string().allow(),
+    chestMeasurement:JOI.string().allow(),
+    stomachMeasurement:JOI.string().allow(),
+    waistMeasurement:JOI.string().allow(),
+    hipsMeasurement:JOI.string().allow(),
+    thighMeasurement:JOI.string().allow(),
+    calvesMeasurement:JOI.string().allow(),
+    reviewExperience:JOI.string().allow(),
+});
+
+exports.scheduleCheckInTrackDiet = (req, res, next) => {
+  const result = scheduleCheckInTrackDietSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const scheduleCheckInTrackWorkoutSchema = JOI.object().keys({
+  schedule_id:JOI.string().required(),
+    // client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
+    committementLevel :JOI.string().allow(),
+    trainingInGeneral:JOI.string().allow(),
+    progressWeightsReps:JOI.string().allow(),
+    noOfSetsSuitable:JOI.string().allow(),
+    trainingIntensity:JOI.string().allow(),
+    rateDegreeMuscleRecovery:JOI.string().allow(),
+    exerciseCausePain:JOI.string().allow(),
+    reviewExperience:JOI.string().allow(),
+});
+
+exports.scheduleCheckInTrackWorkout = (req, res, next) => {
+  const result = scheduleCheckInTrackWorkoutSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+
+
+
+
 

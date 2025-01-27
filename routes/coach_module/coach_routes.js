@@ -19,10 +19,11 @@ const {
     createWorkoutPlan,
     getAllWorkoutPlans,
     getWorkoutPlanID,
-    scheduleChekcIn,
-    getAllScheduleChekcIn,
+    scheduleCheckIn,
+    getAllScheduleCheckIn,
     editDietPlan,
-    editWorkoutPlan
+    editWorkoutPlan,
+    scheduleCheckInByType
   } = require("../../middlewares/index");
 
 
@@ -49,8 +50,10 @@ const {
   Router.post('/get/workoutPlanById',authMiddleware,getWorkoutPlanID,Coach_Plans.getWorkoutplanById);
 
   //schedule Check In 
-  Router.post('/scheduleCheckIn',authMiddleware,scheduleChekcIn,Schedule_checkIn.scheduleCheckIn);
-  Router.post('/getAllScheduleCheckIn',authMiddleware,getAllScheduleChekcIn,Schedule_checkIn.getAllscheduleCheckIn);
+  Router.post('/scheduleCheckIn',authMiddleware,scheduleCheckIn,Schedule_checkIn.scheduleCheckIn);
+  Router.post('/getAllScheduleCheckIn',authMiddleware,getAllScheduleCheckIn,Schedule_checkIn.getAllscheduleCheckIn);
+  Router.post('/getScheduleCheckInData',authMiddleware,scheduleCheckInByType,Schedule_checkIn.getScheduleCheckData);
+
 
 
 

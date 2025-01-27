@@ -12,7 +12,9 @@ const {
     FlatObjects,
     completeMeal,
     scheduleCheckInByType,
-    completeExercise
+    completeExercise,
+    scheduleCheckInTrackDiet,
+    scheduleCheckInTrackWorkout
   } = require("../../middlewares/index");
 
   Router.post('/login',login,UserController.login);
@@ -31,9 +33,10 @@ const {
 
   //scheduleCheckIn
   Router.post('/getScheduleCheckInByType',authMiddleware,scheduleCheckInByType, UserController.getScheduleCheckInByType)
-  // Router.post('/scheduleCheckIN',authMiddleware,scheduleCheckInByType, UserController.getScheduleCheckInByType)
+  Router.post('/scheduleCheckInDiet',authMiddleware,upload.single("bodyImage"),scheduleCheckInTrackDiet, UserController.ScheduleCheckInTrackDiet)
+  Router.post('/scheduleCheckInWorkout',authMiddleware,scheduleCheckInTrackWorkout, UserController.ScheduleCheckInTrackWorkout)
 
-
+  
 
   module.exports = Router;
 

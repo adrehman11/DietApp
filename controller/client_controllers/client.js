@@ -5,6 +5,7 @@ const { DietPlan } = require('../../models/dietPlan_model')
 const { WorkoutPlan } = require('../../models/workoutPlan_model')
 const { DietPlanTrack } = require("../../models/dietPlanMealTrack_model")
 const { ScheduleCheckIn } = require("../../models/scheduleCheckIn_model")
+const { ScheduleCheckInTrack } = require("../../models/scheduleCheckinTrack_model")
 const { WorkoutPlanTrack } = require("../../models/workoutTrack_model")
 const jwt = require("jsonwebtoken")
 const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus, FoodCategory, WorkoutPlanStatus } = require("../../Helpers/constants")
@@ -335,8 +336,37 @@ exports.completeWorkoutExercise = async (req, res) => {
 exports.getScheduleCheckInByType = async function (req, res) {
   try {
     let client = req.user
-    let data = await ScheduleCheckIn.find({ client_id: client._id, type: req.body.type })
+    let data = await ScheduleCheckIn.find({ client_id: client._id, type: req.body.type,status:"Incomplete" })
     res.status(200).json(data)
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).json(err)
+  }
+}
+exports.ScheduleCheckInTrackDiet = async function (req, res) {
+  try {
+    let client = req.user
+    req.body.client_id = client._id
+    if (req.file) {
+      req.body.bodyImages =  req.file.location
+    }
+    await ScheduleCheckInTrack.create(req.body)
+    await ScheduleCheckIn.updateOne({ _id:  req.body.schedule_id}, { status:"Completed"})
+    res.status(200).json({msg:"CheckIn Completed"})
+  }
+  catch (err) {
+    console.log(err)
+    res.status(500).json(err)
+  }
+}
+exports.ScheduleCheckInTrackWorkout = async function (req, res) {
+  try {
+    let client = req.user
+    req.body.client_id = client._id
+    await ScheduleCheckInTrack.create(req.body)
+    await ScheduleCheckIn.updateOne({ _id:  req.body.schedule_id}, { status:"Completed"})
+    res.status(200).json({msg:"CheckIn Completed"})
   }
   catch (err) {
     console.log(err)
