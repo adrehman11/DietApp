@@ -7,7 +7,7 @@ const bcrypt = require('bcryptjs');
 
 exports.login = async function (req, res) {
     try {
-        let data = await Coach.findOne({ email: req.body.email,role:Roles.coach})
+        let data = await Coach.findOne({ email: req.body.email,role:{ $in: [Roles.coach,Roles.teamLead] }})
         if(!data)
         {
             throw "No email found"
@@ -39,4 +39,16 @@ exports.login = async function (req, res) {
 }
 exports.editProfile = async function (req,res) {
     
+}
+
+exports.assignCoach=async function (req,res)
+{
+    try
+    {
+       
+    }
+    catch(err)
+    {
+
+    }
 }

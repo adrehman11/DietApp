@@ -5,7 +5,7 @@ const { DietPlan } = require('../../models/dietPlan_model')
 const { WorkoutExercise } = require('../../models/workout_exercises_model')
 const { WorkoutPlan } = require('../../models/workoutPlan_model')
 const { Form } = require('../../models/form_model')
-const {FoodMeals,FoodCategory,DietPlanStatus,WorkoutPlanStatus} = require("../../Helpers/constants")
+const {FoodMeals,FoodCategory,DietPlanStatus,WorkoutPlanStatus, Roles} = require("../../Helpers/constants")
 const {calculateTotalNutrientsForPlan} = require("../../Helpers/helperFunction")
 const JWT = require("jsonwebtoken");
 const mongoose = require('mongoose');
@@ -64,8 +64,18 @@ exports.getAllFood=  async function (req, res) {
 
 exports.createDietPlan=  async function (req, res) {
     try {
-        let client = req.user
-        req.body.coach_id = client.id 
+        let coach = req.user
+        if(coach.role == Roles.coach)
+        {
+            req.body.coach_id = coach.id 
+        }
+        else if (coach.role == Roles.teamLead)
+        {
+           if(!req.body.coach_id)
+           {
+             throw "coach id is missing in payload"
+           }
+        }
         if(req.body.status == DietPlanStatus.Saved)
         {
             req.body.status = DietPlanStatus.Saved
@@ -123,8 +133,14 @@ exports.getAllDietPlans=  async function (req, res) {
         let page = req.body.page
         let limit = req.body.limit
         const skip = (page - 1) * limit
-
-        let data = await DietPlan.find({coach_id:coach._id,client_id:req.body.client_id}).skip(skip).limit(limit).populate({path: 'meals.items.referenceId',options: { strictPopulate: false },
+        let query = {}
+        if (coach.role == Roles.coach) {
+            query = {coach_id:coach._id,client_id:req.body.client_id}
+        }
+        else if (coach.role == Roles.teamLead) {
+            query = {client_id:req.body.client_id}
+        }
+        let data = await DietPlan.find(query).skip(skip).limit(limit).populate({path: 'meals.items.referenceId',options: { strictPopulate: false },
         populate: {
             path: 'ingredients.foodItem', // Field inside FoodRecipe to populate
             model: 'FoodItem', // Explicitly specify the FoodItem model
@@ -220,7 +236,18 @@ exports.getAllWorkoutExercises=  async function (req, res) {
 exports.createWorkoutPlan=  async function (req, res) {
     try {
         let coach = req.user
-        req.body.coach_id = coach.id 
+        
+        if(coach.role == Roles.coach)
+        {
+            req.body.coach_id = coach.id 
+        }
+        else if (coach.role == Roles.teamLead)
+        {
+           if(!req.body.coach_id)
+           {
+             throw "coach id is missing in payload"
+           }
+        }
         if(req.body.status == WorkoutPlanStatus.Saved)
         {
             req.body.status = WorkoutPlanStatus.Saved
@@ -278,8 +305,14 @@ exports.getAllWorkoutplan=  async function (req, res) {
         let page = req.body.page
         let limit = req.body.limit
         const skip = (page - 1) * limit
-
-        let data = await WorkoutPlan.find({coach_id:coach._id,client_id:req.body.client_id}).skip(skip).limit(limit)
+        let query = {}
+        if (coach.role == Roles.coach) {
+            query = {coach_id:coach._id,client_id:req.body.client_id}
+        }
+        else if (coach.role == Roles.teamLead) {
+            query = {client_id:req.body.client_id}
+        }
+        let data = await WorkoutPlan.find(query).skip(skip).limit(limit)
         .populate({
         path: 'client_id',
         select: '_id full_name email role diet_plan_status workout_plan_status subsctiption_status',

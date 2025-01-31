@@ -192,6 +192,7 @@ const createDietPlanSchema = JOI.object().keys({
   name: JOI.string().required(),
   numberOfDays: JOI.number().required(),
   client_id: JOI.string().required(),
+  coach_id:JOI.string().optional(),
   status: JOI.string().valid(DietPlanStatus.Saved, DietPlanStatus.Active).required(),
   coach_notes: JOI.string().allow(),
   meals: JOI.array().items(
@@ -385,6 +386,7 @@ const createWorkoutPlanSchema = JOI.object().keys({
     })).min(1),
   status: JOI.string().required(),
   client_id: JOI.string().required(),
+  coach_id: JOI.string().optional(),
   coach_notes: JOI.string().required()
 });
 
@@ -500,6 +502,7 @@ const scheduleCheckInInSchema = JOI.object().keys({
   date: JOI.string().required(),
   type:JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
   client_id: JOI.string().required(),
+  coach_id:JOI.string().optional(),
 
 });
 

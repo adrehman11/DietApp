@@ -14,7 +14,7 @@ module.exports = async (req, res, next) => {
     var decoded = JWT.verify(token, secret);
     let user = await Coach.findOne({
         _id: decoded.id,
-        role:Roles.coach,
+        role:{ $in: [Roles.coach,Roles.teamLead] },
         isLogin:true 
     });
     if (!user) {

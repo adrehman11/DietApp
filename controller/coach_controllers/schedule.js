@@ -8,7 +8,17 @@ const mongoose = require('mongoose');
 exports.scheduleCheckIn = async function (req, res) {
     try {
         let coach = req.user
-        req.body.coach_id= coach.id
+        if(coach.role == Roles.coach)
+        {
+            req.body.coach_id = coach.id 
+        }
+        else if (coach.role == Roles.teamLead)
+        {
+           if(!req.body.coach_id)
+           {
+             throw "coach id is missing in payload"
+           }
+        }
         req.body.status="Incomplete"
         await ScheduleCheckIn.create(req.body)
         res.status(200).json({msg:"Check in created"})
@@ -25,7 +35,14 @@ exports.scheduleCheckIn = async function (req, res) {
 exports.getAllscheduleCheckIn = async function (req, res) {
     try {
         let coach = req.user
-        let data = await ScheduleCheckIn.find({coach_id:coach._id,date:{$gte:req.body.startDate,$lte:req.body.endDate}}).populate({
+        let query = {}
+        if (coach.role == Roles.coach) {
+            query = {coach_id:coach._id,date:{$gte:req.body.startDate,$lte:req.body.endDate}}
+        }
+        else if (coach.role == Roles.teamLead) {
+            query = {date:{$gte:req.body.startDate,$lte:req.body.endDate}}
+        }
+        let data = await ScheduleCheckIn.find(query).populate({
             path: 'client_id',
             select: '_id full_name email role diet_plan_status workout_plan_status subsctiption_status',
           })
@@ -43,13 +60,23 @@ exports.getScheduleCheckData = async function (req, res) {
         //     path: 'client_id',
         //     select: '_id full_name email role diet_plan_status workout_plan_status subsctiption_status',
         //   })
+        let matchQuery = {}
+        if (coach.role == Roles.coach) {
+            matchQuery = {
+                status: "Completed",  // Filter for completed check-ins
+                coach_id:coach._id,
+                type:req.body.type
+            }
+        }
+        else if (coach.role == Roles.teamLead) {
+            matchQuery = {
+                status: "Completed",  // Filter for completed check-ins
+                type:req.body.type
+            }
+        }
         const completedCheckIns = await ScheduleCheckIn.aggregate([
             {
-                $match: {
-                    status: "Completed",  // Filter for completed check-ins
-                    coach_id:coach._id,
-                    type:req.body.type
-                }
+                $match: matchQuery
             },
             {
                 $lookup: {
