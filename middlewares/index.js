@@ -410,12 +410,15 @@ const editWorkoutPlanSchema = JOI.object().keys({
         exercise_details: JOI.array().items(
           JOI.object({
             exercise_name: JOI.string().required(),
-            Set: JOI.string().required(),
-            RIR: JOI.string().required(),
-            Tempo: JOI.string().required(),
-            Rest: JOI.string().required(),
-            Kg: JOI.string().required(),
-            Reps: JOI.string().required()
+            workoutDetails:JOI.array().items(
+              JOI.object({
+                Set: JOI.string().required(),
+                RIR: JOI.string().required(),
+                Tempo: JOI.string().required(),
+                Rest: JOI.string().required(),
+                Kg: JOI.string().required(),
+                Reps: JOI.string().required()
+              })).min(1)
           })).min(1)
       }),
       cardio: JOI.string().required(),
