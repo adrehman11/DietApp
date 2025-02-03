@@ -308,29 +308,66 @@ exports.getActiveWorkoutPlan = async (req, res) => {
 }
 exports.completeWorkoutExercise = async (req, res) => {
   try {
-    let client = req.user
-    const existingTrack = await WorkoutPlanTrack.findOne({
-      client_id: client._id,
-      workoutPlan_id: req.body.workoutPlan_id,
-      exercise_details_id: req.body.exercise_details_id
-    });
+    let client = req.user;
+    const { workoutPlan_id, exercise_details_id } = req.body;
 
-    if (existingTrack) {
-      return res.status(400).json({ message: 'Exercise already marked as completed' });
+    if (exercise_details_id.length === 0) {
+      return res.status(400).json({ message: 'exercise_details_id must be a non-empty array' });
     }
 
-    // Create new tracking record
-    const track = new WorkoutPlanTrack({ client_id: client._id, workoutPlan_id: req.body.workoutPlan_id, exercise_details_id: req.body.exercise_details_id });
-    await track.save();
+    // Find existing tracking records for any of the provided exercise_details_id
+    const existingTracks = await WorkoutPlanTrack.find({
+      client_id: client._id,
+      workoutPlan_id,
+      exercise_details_id: { $in: exercise_details_id } // Check if any exist
+    });
 
-    res.status(201).json({ message: 'Workout tracked successfully', track });
+    if (existingTracks.length > 0) {
+      return res.status(400).json({ 
+        message: 'Some exercises are already marked as completed', 
+        existingExercises: existingTracks.map(track => track.exercise_details_id)
+      });
+    }
 
-    return
-  }
-  catch (error) {
+    // Create new tracking records for all exercise_details_id
+    const tracksToCreate = exercise_details_id.map(id => ({
+      client_id: client._id,
+      workoutPlan_id,
+      exercise_details_id: id
+    }));
+
+    const newTracks = await WorkoutPlanTrack.insertMany(tracksToCreate);
+
+    res.status(201).json({ message: 'Workout exercises tracked successfully', newTracks });
+  } catch (error) {
     return res.status(500).json({ msg: error.message });
   }
-}
+};
+// exports.completeWorkoutExercise = async (req, res) => {
+//   try {
+//     let client = req.user
+//     const existingTrack = await WorkoutPlanTrack.findOne({
+//       client_id: client._id,
+//       workoutPlan_id: req.body.workoutPlan_id,
+//       exercise_details_id: req.body.exercise_details_id
+//     });
+
+//     if (existingTrack) {
+//       return res.status(400).json({ message: 'Exercise already marked as completed' });
+//     }
+
+//     // Create new tracking record
+//     const track = new WorkoutPlanTrack({ client_id: client._id, workoutPlan_id: req.body.workoutPlan_id, exercise_details_id: req.body.exercise_details_id });
+//     await track.save();
+
+//     res.status(201).json({ message: 'Workout tracked successfully', track });
+
+//     return
+//   }
+//   catch (error) {
+//     return res.status(500).json({ msg: error.message });
+//   }
+// }
 
 
 exports.getScheduleCheckInByType = async function (req, res) {

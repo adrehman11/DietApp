@@ -302,7 +302,7 @@ exports.completeMeal = (req, res, next) => {
   }
 };
 const completeExerciseSchema = JOI.object().keys({
-  exercise_details_id: JOI.string().required(),
+  exercise_details_id: JOI.array().required().min(1),
   workoutPlan_id: JOI.string().required(),
 })
 
