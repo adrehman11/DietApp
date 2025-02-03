@@ -287,9 +287,12 @@ exports.getActiveWorkoutPlan = async (req, res) => {
     if (!data) {
       return res.status(400).json({ msg: "No Data Found" });
     }
+    const startOfDay = moment().startOf('day').toDate();
+    const endOfDay = moment().endOf('day').toDate();
     const completedExercises = await WorkoutPlanTrack.find({
       client_id: client.id,
-      workoutPlan_id: data._id
+      workoutPlan_id: data._id,
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
     }).select('exercise_details_id');
     const completedExerciseIds = completedExercises.map(item => item.exercise_details_id);
     data.exercises.forEach((exercise) => {
