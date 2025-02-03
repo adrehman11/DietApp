@@ -310,6 +310,8 @@ exports.completeWorkoutExercise = async (req, res) => {
   try {
     let client = req.user;
     const { workoutPlan_id, exercise_details_id } = req.body;
+    const startOfDay = moment().startOf('day').toDate();
+    const endOfDay = moment().endOf('day').toDate();
 
     if (exercise_details_id.length === 0) {
       return res.status(400).json({ message: 'exercise_details_id must be a non-empty array' });
@@ -319,7 +321,8 @@ exports.completeWorkoutExercise = async (req, res) => {
     const existingTracks = await WorkoutPlanTrack.find({
       client_id: client._id,
       workoutPlan_id,
-      exercise_details_id: { $in: exercise_details_id } // Check if any exist
+      exercise_details_id: { $in: exercise_details_id }, // Check if any exist
+      createdAt: { $gte: startOfDay, $lte: endOfDay },
     });
 
     if (existingTracks.length > 0) {
