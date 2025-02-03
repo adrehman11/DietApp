@@ -592,6 +592,34 @@ exports.scheduleCheckInTrackWorkout = (req, res, next) => {
 
 
 
+const assignCoachSchema = JOI.object().keys({
+  type:JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
+  _id:JOI.string().required(),
+  clientId:JOI.string().required()
+});
+
+exports.assignCoach = (req, res, next) => {
+  const result = assignCoachSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
 
 
 
+const getAllCoachScehma = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  search: JOI.string().allow(),
+});
+
+exports.getAllCoach = (req, res, next) => {
+  const result = getAllCoachScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};

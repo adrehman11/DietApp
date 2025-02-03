@@ -1,6 +1,7 @@
 
 const { Coach } = require('../../models/coach_model')
-const {Roles,Form_Types} = require("../../Helpers/constants")
+const { User } = require('../../models/client_model')
+const {Roles,Form_Types,ScheduleCheckInType} = require("../../Helpers/constants")
 const JWT = require("jsonwebtoken");
 const mongoose = require('mongoose');
 const bcrypt = require('bcryptjs');
@@ -41,14 +42,45 @@ exports.editProfile = async function (req,res) {
     
 }
 
-exports.assignCoach=async function (req,res)
-{
-    try
-    {
-       
-    }
-    catch(err)
-    {
+exports.assignCoach = async function (req, res) {
+    try {
+        let coach = req.user;
 
+        // Check if the user is a Team Lead
+        if (coach.role !== Roles.teamLead) {
+            return res.status(400).json({ msg: "Not Authorized" });
+        }
+
+        // Find client data
+        let clientData = await User.findOne({ _id: req.body.clientId });
+        if (!clientData) {
+            return res.status(400).json({ msg: "No client found" });
+        }
+
+        // Find coach data
+        let coachData = await Coach.findOne({ _id: req.body._id });
+        if (!coachData) {
+            return res.status(400).json({ msg: "No Coach found" });
+        }
+
+        let updateQuery = {};
+
+        // Update coach assignment based on type
+        if (req.body.type === ScheduleCheckInType.Diet) {
+            updateQuery = { coach_id: req.body._id  };
+        } else if (req.body.type === ScheduleCheckInType.Workout) {
+            updateQuery = { workoutCoach_id: req.body._id  };
+        } else {
+            return res.status(400).json({ msg: "Invalid check-in type" });
+        }
+
+        // Update user with the new coach
+        await User.findOneAndUpdate({ _id: req.body.clientId }, updateQuery, { new: true });
+
+        // Send success response
+        res.status(200).json({ msg: "Coach assigned successfully" });
+
+    } catch (err) {
+        res.status(500).json({ msg: err.message });
     }
-}
+};

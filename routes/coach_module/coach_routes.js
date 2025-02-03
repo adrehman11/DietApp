@@ -23,7 +23,9 @@ const {
     getAllScheduleCheckIn,
     editDietPlan,
     editWorkoutPlan,
-    scheduleCheckInByType
+    scheduleCheckInByType,
+    assignCoach,
+    getAllCoach
   } = require("../../middlewares/index");
 
 
@@ -53,6 +55,11 @@ const {
   Router.post('/scheduleCheckIn',authMiddleware,scheduleCheckIn,Schedule_checkIn.scheduleCheckIn);
   Router.post('/getAllScheduleCheckIn',authMiddleware,getAllScheduleCheckIn,Schedule_checkIn.getAllscheduleCheckIn);
   Router.post('/getScheduleCheckInData',authMiddleware,scheduleCheckInByType,Schedule_checkIn.getScheduleCheckData);
+
+ //assign coach team lead routes
+  Router.post('/AssignCoach',authMiddleware,assignCoach,CoachController.assignCoach);
+  Router.post('/getAllCoach',authMiddleware,getAllCoach,Coach_client_Controller.getAllCoach);
+
 
 
 
