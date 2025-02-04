@@ -1,5 +1,6 @@
 
 const { ScheduleCheckIn } = require('../../models/scheduleCheckIn_model')
+const { Roles} = require("../../Helpers/constants")
 // const {FoodMeals,FoodCategory,DietPlanStatus,WorkoutPlanStatus} = require("../../Helpers/constants")
 // const {calculateTotalNutrientsForPlan} = require("../../Helpers/helperFunction")
 // const JWT = require("jsonwebtoken");

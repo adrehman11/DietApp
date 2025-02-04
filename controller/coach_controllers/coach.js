@@ -71,7 +71,7 @@ exports.assignCoach = async function (req, res) {
         } else if (req.body.type === ScheduleCheckInType.Workout) {
             updateQuery = { workoutCoach_id: req.body._id  };
         } else {
-            return res.status(400).json({ msg: "Invalid check-in type" });
+            return res.status(400).json({ msg: "Invalid type" });
         }
 
         // Update user with the new coach
