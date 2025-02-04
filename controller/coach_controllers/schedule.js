@@ -17,7 +17,7 @@ exports.scheduleCheckIn = async function (req, res) {
         {
            if(!req.body.coach_id)
            {
-             throw "coach id is missing in payload"
+             throw "coach id is missing in payload "
            }
         }
         req.body.status="Incomplete"
