@@ -1,6 +1,8 @@
 var express = require('express');
 const Router = express.Router();
 const UserController = require("../../controller/client_controllers/client");
+const ChatController = require("../../controller/common_controllers/chat");
+
 const upload = require("../../utility/aws")
 const authMiddleware = require("../../middlewares/clientauth");
 
@@ -36,6 +38,8 @@ const {
   Router.post('/scheduleCheckInDiet',authMiddleware,upload.single("bodyImage"),scheduleCheckInTrackDiet, UserController.ScheduleCheckInTrackDiet)
   Router.post('/scheduleCheckInWorkout',authMiddleware,scheduleCheckInTrackWorkout, UserController.ScheduleCheckInTrackWorkout)
 
+  //chat module
+  Router.get('/inboxChat',authMiddleware,ChatController.getInboxChat);
   
 
   module.exports = Router;

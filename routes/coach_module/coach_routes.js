@@ -1,6 +1,7 @@
 var express = require('express');
 const Router = express.Router();
 const CoachController = require("../../controller/coach_controllers/coach.js");
+const ChatController = require("../../controller/common_controllers/chat.js");
 const Coach_client_Controller = require("../../controller/coach_controllers/coach_clients");
 const Coach_Plans = require("../../controller/coach_controllers/coach_plans");
 const Schedule_checkIn = require("../../controller/coach_controllers/schedule");
@@ -59,6 +60,9 @@ const {
  //assign coach team lead routes
   Router.post('/AssignCoach',authMiddleware,assignCoach,CoachController.assignCoach);
   Router.post('/getAllCoach',authMiddleware,getAllCoach,Coach_client_Controller.getAllCoach);
+
+  //chat module
+  Router.get('/inboxChat',authMiddleware,ChatController.getInboxChat);
 
 
 
