@@ -88,7 +88,6 @@ exports.createDietPlan=  async function (req, res) {
         {
             res.status(401).json({message:"Please Provide status"})
         }
-        await DietPlan.create(req.body)
         if (req.body.status === DietPlanStatus.Active) {
             // Deactivate all other plans for the client before activating a new one
             await DietPlan.updateMany(
@@ -96,6 +95,8 @@ exports.createDietPlan=  async function (req, res) {
                 { $set: { status: DietPlanStatus.Saved } }
             );
         }
+        await DietPlan.create(req.body)
+
         res.status(200).json({message:"Diet plan created"})
 
     }
@@ -121,11 +122,7 @@ exports.editDietPlan=  async function (req, res) {
         {
             res.status(401).json({message:"Please Provide status"})
         }
-        const updatedDietPlan = await DietPlan.findByIdAndUpdate(
-            id, 
-            updateData, 
-            { new: true, runValidators: true }  // Return updated document and run schema validation
-        );
+        
         if (req.body.status === DietPlanStatus.Active) {
             // Deactivate all other plans for the client before activating a new one
             await DietPlan.updateMany(
@@ -133,6 +130,11 @@ exports.editDietPlan=  async function (req, res) {
                 { $set: { status: DietPlanStatus.Saved } }
             );
         }
+        const updatedDietPlan = await DietPlan.findByIdAndUpdate(
+            id, 
+            updateData, 
+            { new: true, runValidators: true }  // Return updated document and run schema validation
+        );
         res.status(200).json({message:"Diet plan updated",updatedDietPlan})
 
     }
