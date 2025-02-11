@@ -89,6 +89,13 @@ exports.createDietPlan=  async function (req, res) {
             res.status(401).json({message:"Please Provide status"})
         }
         await DietPlan.create(req.body)
+        if (req.body.status === DietPlanStatus.Active) {
+            // Deactivate all other plans for the client before activating a new one
+            await DietPlan.updateMany(
+                { client_id: req.body.client_id, status: DietPlanStatus.Active },
+                { $set: { status: DietPlanStatus.Saved } }
+            );
+        }
         res.status(200).json({message:"Diet plan created"})
 
     }
@@ -119,6 +126,13 @@ exports.editDietPlan=  async function (req, res) {
             updateData, 
             { new: true, runValidators: true }  // Return updated document and run schema validation
         );
+        if (req.body.status === DietPlanStatus.Active) {
+            // Deactivate all other plans for the client before activating a new one
+            await DietPlan.updateMany(
+                { client_id: req.body.client_id, status: DietPlanStatus.Active },
+                { $set: { status: DietPlanStatus.Saved } }
+            );
+        }
         res.status(200).json({message:"Diet plan updated",updatedDietPlan})
 
     }
@@ -159,6 +173,36 @@ exports.getAllDietPlans=  async function (req, res) {
         plan.client_id.form = formData || {};  // Attach form data to client
     }
         let dietPlansWithNutrients = calculateTotalNutrients(data);
+        dietPlansWithNutrients.forEach(plan => {
+            plan.meals.forEach(meal => {
+                const totalNutrientsMeal = {
+                    TotalCalories: 0,
+                    TotalFat: 0,
+                    TotalProtein: 0,
+                    TotalCarbohydrates: 0
+                };
+        
+                meal.items.forEach(item => {
+                    if (item.type === FoodCategory.FoodItem) {
+                        const nutrients = item.referenceId;
+                        totalNutrientsMeal.TotalCalories += (nutrients.calories * item.quantity) || 0;
+                        totalNutrientsMeal.TotalFat += (nutrients.fat * item.quantity) || 0;
+                        totalNutrientsMeal.TotalProtein += (nutrients.protein * item.quantity) || 0;
+                        totalNutrientsMeal.TotalCarbohydrates += (nutrients.carbohydrates * item.quantity) || 0;
+                    } else if (item.type === FoodCategory.Recipe) {
+                        item.referenceId.ingredients.forEach(ingredient => {
+                            const foodItem = ingredient.foodItem;
+                            totalNutrientsMeal.TotalCalories += (foodItem.calories * ingredient.quantity) || 0;
+                            totalNutrientsMeal.TotalFat += (foodItem.fat * ingredient.quantity) || 0;
+                            totalNutrientsMeal.TotalProtein += (foodItem.protein * ingredient.quantity) || 0;
+                            totalNutrientsMeal.TotalCarbohydrates += (foodItem.carbohydrates * ingredient.quantity) || 0;
+                        });
+                    }
+                });
+        
+                meal.totalMealNutrients = totalNutrientsMeal;
+            });
+        });
 
 
 

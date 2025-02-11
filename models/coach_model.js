@@ -11,6 +11,7 @@ var CoachSchema = new mongoose.Schema({
     U_ID:{type:String,default:null},
     // phoneNumber: {type: String,default:null},
     isLogin:{type: Boolean,default:false},
+    image: {type: String,default :null},
     // isNewUser:{type: Boolean,default:true},
     // otpCode:{type:Number,default:null},
     // otpCode_timestamp:{type:String,default:null},

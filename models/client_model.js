@@ -4,6 +4,7 @@ const {DietApp} = require('../utility/connection');
 var bcrypt = require('bcrypt-nodejs');
 var UserSchema = new mongoose.Schema({
     full_name: {type: String,default :null},
+    image: {type: String,default :null},
     email: {type: String,default:null},
     phoneNumber: {type: String,default:null},
     isLogin:{type: Boolean,default:false},
