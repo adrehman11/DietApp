@@ -243,6 +243,18 @@ exports.editDietPlan = (req, res, next) => {
     next();
   }
 };
+const deleteDietPlanSchema = JOI.object().keys({
+  id:JOI.string().required(),
+});
+
+exports.deleteDietPlan = (req, res, next) => {
+  const result = deleteDietPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
 
 
 const getAllDietPlansSchema = JOI.object().keys({

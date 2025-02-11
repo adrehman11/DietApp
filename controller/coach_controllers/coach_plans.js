@@ -255,6 +255,26 @@ exports.getDietPlanById=  async function (req, res) {
         res.status(500).json(err)
     }
 }
+exports.deletePlan=  async function (req, res) {
+    try {
+        let client = req.user
+
+        const dietPlan = await DietPlan.findById(req.body.id);
+        if (!dietPlan) {
+            return res.status(404).json({ message: "Diet plan not found" });
+        }
+
+        // Delete the diet plan
+        await DietPlan.findByIdAndDelete(req.body.id);
+        res.status(200).json({ message: "Diet plan deleted successfully" });
+
+
+    }
+    catch (err) {
+        console.log(err)
+        res.status(500).json(err)
+    }
+}
 
 function calculateTotalNutrients(dietPlans) {
     return dietPlans.map(plan => ({

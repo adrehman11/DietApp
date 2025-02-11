@@ -25,7 +25,8 @@ const {
     editWorkoutPlan,
     scheduleCheckInByType,
     assignCoach,
-    getAllCoach
+    getAllCoach,
+    deleteDietPlan
   } = require("../../middlewares/index");
 
 
@@ -39,6 +40,7 @@ const {
   Router.post('/get/AllFoodItems',authMiddleware,AllFoodItems,Coach_Plans.getAllFood);
   Router.post('/create/DietPlan',authMiddleware,createDietPlan,Coach_Plans.createDietPlan);
   Router.post('/edit/DietPlan',authMiddleware,editDietPlan,Coach_Plans.editDietPlan);
+  Router.post('/delete/DietPlan',authMiddleware,deleteDietPlan,Coach_Plans.deletePlan);
   Router.post('/get/DietPlans',authMiddleware,getAllDietPlans,Coach_Plans.getAllDietPlans);
   Router.post('/get/DietPlanById',authMiddleware,getDietPlanID,Coach_Plans.getDietPlanById);
 
