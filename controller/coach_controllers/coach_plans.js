@@ -192,13 +192,25 @@ exports.getAllDietPlans=  async function (req, res) {
                         totalNutrientsMeal.TotalProtein += (nutrients.protein * item.quantity) || 0;
                         totalNutrientsMeal.TotalCarbohydrates += (nutrients.carbohydrates * item.quantity) || 0;
                     } else if (item.type === FoodCategory.Recipe) {
+                        const totalRecipeNutrients = {
+                            TotalCalories: 0,
+                            TotalFat: 0,
+                            TotalProtein: 0,
+                            TotalCarbohydrates: 0
+                        };
                         item.referenceId.ingredients.forEach(ingredient => {
                             const foodItem = ingredient.foodItem;
-                            totalNutrientsMeal.TotalCalories += (foodItem.calories * ingredient.quantity) || 0;
-                            totalNutrientsMeal.TotalFat += (foodItem.fat * ingredient.quantity) || 0;
-                            totalNutrientsMeal.TotalProtein += (foodItem.protein * ingredient.quantity) || 0;
-                            totalNutrientsMeal.TotalCarbohydrates += (foodItem.carbohydrates * ingredient.quantity) || 0;
+                            
+                            totalRecipeNutrients.TotalCalories += (foodItem.calories * ingredient.quantity) || 0;
+                            totalRecipeNutrients.TotalFat += (foodItem.fat * ingredient.quantity) || 0;
+                            totalRecipeNutrients.TotalProtein += (foodItem.protein * ingredient.quantity) || 0;
+                            totalRecipeNutrients.TotalCarbohydrates += (foodItem.carbohydrates * ingredient.quantity) || 0;
                         });
+                        item.totalRecipeNutrients = totalRecipeNutrients;
+                        totalNutrientsMeal.TotalCalories += totalRecipeNutrients.TotalCalories;
+                        totalNutrientsMeal.TotalFat += totalRecipeNutrients.TotalFat;
+                        totalNutrientsMeal.TotalProtein += totalRecipeNutrients.TotalProtein;
+                        totalNutrientsMeal.TotalCarbohydrates += totalRecipeNutrients.TotalCarbohydrates;
                     }
                 });
         

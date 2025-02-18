@@ -13,6 +13,18 @@ function otp_code() {
         resolve(result);
     })
 }
+function generateTicketId() {
+    return new Promise(async (resolve) => {
+        var result = '';
+        var characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        var charactersLength = characters.length;
+        for (var i = 0; i < 6; i++) {
+            result += characters.charAt(Math.floor(Math.random() *
+                charactersLength));
+        }
+        resolve(result);
+    })
+}
 function hash(password) {
     return bcrypt.hashSync(password, 10);
 }
@@ -59,5 +71,6 @@ function calculateTotalNutrientsForPlan(plan) {
 module.exports = {
     otp_code,
     hash,
-    calculateTotalNutrientsForPlan
+    calculateTotalNutrientsForPlan,
+    generateTicketId
 }

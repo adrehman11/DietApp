@@ -1,5 +1,5 @@
 const JOI = require("@hapi/joi");
-const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType } = require("../Helpers/constants")
+const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType, Roles } = require("../Helpers/constants")
 
 const loginSchema = JOI.object().keys({
   email: JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
@@ -629,6 +629,98 @@ const getAllCoachScehma = JOI.object().keys({
 
 exports.getAllCoach = (req, res, next) => {
   const result = getAllCoachScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+
+
+const generateSupportTicketScehma = JOI.object().keys({
+  name: JOI.string().required(),
+  email:  JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
+  department: JOI.string().required(),
+});
+
+exports.generateSupportTicket = (req, res, next) => {
+  const result = generateSupportTicketScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const AddRoleScehma = JOI.object().keys({
+  full_name: JOI.string().required(),
+  email:  JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
+  password: JOI.string().required(),
+  role: JOI.string().valid(Roles.coach,Roles.customerSupport,Roles.staff,Roles.teamLead).required(),
+});
+
+exports.AddRole = (req, res, next) => {
+  const result = AddRoleScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+
+const getSupportTicketByTypeSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  type:JOI.string().valid("All","Pending","Processing","Resolved").required(),
+});
+
+exports.getSupportTicketByType = (req, res, next) => {
+  const result = getSupportTicketByTypeSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const updateTicketStatusSchema = JOI.object().keys({
+  _id: JOI.string().required(),
+  status:JOI.string().valid("Pending","Processing","Resolved").required(),
+});
+
+exports.updateTicketStatus = (req, res, next) => {
+  const result = updateTicketStatusSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const chatOnTicketSchema = JOI.object().keys({
+  supportTicket_id: JOI.string().required(),
+  // client_id: JOI.string().required(),
+  message: JOI.string().required()
+});
+
+exports.chatOnTicket = (req, res, next) => {
+  const result = chatOnTicketSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getSupportTicketChatByIdSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  ticket_id:JOI.string().required(),
+});
+
+exports.getSupportTicketChatById = (req, res, next) => {
+  const result = getSupportTicketChatByIdSchema.validate(req.body);
   if (result.error) {
     return res.status(400).json({ msg: result.error.message });
   } else {

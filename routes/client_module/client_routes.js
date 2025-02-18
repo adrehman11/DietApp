@@ -14,7 +14,10 @@ const {
     scheduleCheckInByType,
     completeExercise,
     scheduleCheckInTrackDiet,
-    scheduleCheckInTrackWorkout
+    scheduleCheckInTrackWorkout,
+    generateSupportTicket,
+    chatOnTicket,
+    getSupportTicketChatById
   } = require("../../middlewares/index");
 
   Router.post('/login',login,UserController.login);
@@ -35,6 +38,13 @@ const {
   Router.post('/getScheduleCheckInByType',authMiddleware,scheduleCheckInByType, UserController.getScheduleCheckInByType)
   Router.post('/scheduleCheckInDiet',authMiddleware,upload.single("bodyImage"),scheduleCheckInTrackDiet, UserController.ScheduleCheckInTrackDiet)
   Router.post('/scheduleCheckInWorkout',authMiddleware,scheduleCheckInTrackWorkout, UserController.ScheduleCheckInTrackWorkout)
+
+  //generate Ticket
+  Router.post("/createSupportTicket",authMiddleware,upload.single("image"),generateSupportTicket,UserController.createSupportTicket )
+  Router.get("/getSupportTickets",authMiddleware,UserController.getAllSupportTicket )
+  Router.post('/chatOnTicket',authMiddleware,chatOnTicket,UserController.chatOnTicket);
+  Router.post('/getChatByTicketId',authMiddleware,getSupportTicketChatById,UserController.GetChatByTicketId);
+
 
   
 

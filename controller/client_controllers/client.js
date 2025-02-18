@@ -7,9 +7,11 @@ const { DietPlanTrack } = require("../../models/dietPlanMealTrack_model")
 const { ScheduleCheckIn } = require("../../models/scheduleCheckIn_model")
 const { ScheduleCheckInTrack } = require("../../models/scheduleCheckinTrack_model")
 const { WorkoutPlanTrack } = require("../../models/workoutTrack_model")
+const { SupportTicket } = require("../../models/supportTicket_model")
+const { SupportTicketChat } = require("../../models/supportTicketChat_model")
 const jwt = require("jsonwebtoken")
 const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus, FoodCategory, WorkoutPlanStatus } = require("../../Helpers/constants")
-const { otp_code, hash, calculateTotalNutrientsForPlan } = require("../../Helpers/helperFunction")
+const { otp_code, hash, calculateTotalNutrientsForPlan,generateTicketId } = require("../../Helpers/helperFunction")
 const moment = require('moment');
 const JWT = require("jsonwebtoken");
 const mongoose = require('mongoose');
@@ -380,11 +382,11 @@ exports.getScheduleCheckInByType = async function (req, res) {
   try {
     let client = req.user
     let data = await ScheduleCheckIn.find({ client_id: client._id, type: req.body.type,status:"Incomplete" })
-    res.status(200).json(data)
+    return res.status(200).json(data)
   }
   catch (err) {
     console.log(err)
-    res.status(500).json(err)
+    return res.status(500).json(err)
   }
 }
 exports.ScheduleCheckInTrackDiet = async function (req, res) {
@@ -396,11 +398,11 @@ exports.ScheduleCheckInTrackDiet = async function (req, res) {
     }
     await ScheduleCheckInTrack.create(req.body)
     await ScheduleCheckIn.updateOne({ _id:  req.body.schedule_id}, { status:"Completed"})
-    res.status(200).json({msg:"CheckIn Completed"})
+    return res.status(200).json({msg:"CheckIn Completed"})
   }
   catch (err) {
     console.log(err)
-    res.status(500).json(err)
+    return res.status(500).json(err)
   }
 }
 exports.ScheduleCheckInTrackWorkout = async function (req, res) {
@@ -409,10 +411,71 @@ exports.ScheduleCheckInTrackWorkout = async function (req, res) {
     req.body.client_id = client._id
     await ScheduleCheckInTrack.create(req.body)
     await ScheduleCheckIn.updateOne({ _id:  req.body.schedule_id}, { status:"Completed"})
-    res.status(200).json({msg:"CheckIn Completed"})
+    return res.status(200).json({msg:"CheckIn Completed"})
+  }
+  catch (err) {
+    console.log(err)
+    return res.status(500).json(err)
+  }
+}
+
+
+exports.createSupportTicket = async function (req, res) {
+  try {
+    let client = req.user
+    req.body.client_id = client._id
+    if (req.file) {
+      req.body.image =  req.file.location
+    }
+    req.body.status= "Pending"
+    req.body.TicketId= await generateTicketId();
+    await SupportTicket.create(req.body)
+    return res.status(200).json({msg:"Ticket Created"})
+
+  }
+  catch (err) {
+    console.log(err)
+    return res.status(500).json(err)
+  }
+}
+exports.getAllSupportTicket = async function (req, res) {
+  try {
+    let client = req.user
+    let data = await  SupportTicket.find({client_id :  client._id})
+    res.status(200).json(data)
+
   }
   catch (err) {
     console.log(err)
     res.status(500).json(err)
   }
 }
+exports.chatOnTicket = async function (req, res) 
+{
+  try {
+     req.body.client_id = req.user._id
+    await SupportTicketChat.create(req.body)
+    return res.status(200).json({ message: "Response submitted"});
+
+  } catch (err) {
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+};
+exports.GetChatByTicketId = async function (req, res) 
+{
+  try {
+   let {  page = 1, pageSize = 10 } = req.body;
+    page = parseInt(page);
+    pageSize = parseInt(pageSize);
+   let data = await SupportTicketChat.find({supportTicket_id:req.body.ticket_id})
+   .populate("client_id", "full_name image") // Selective population
+   .populate("Support_id", "full_name image") // Selective population
+   .skip((page - 1) * pageSize) // Skipping previous pages
+   .limit(pageSize) // Limiting results per page
+   .sort({ createdAt: -1 });
+    return res.status(200).json(data);
+
+  } catch (err) {
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+};
