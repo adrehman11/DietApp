@@ -1,5 +1,6 @@
 
 const { FoodItem } = require('../../models/foodItem_model')
+const { Supplement } = require('../../models/supplements_model')
 const { FoodRecipe } = require('../../models/foodRecipe_model')
 const { DietPlan } = require('../../models/dietPlan_model')
 const { WorkoutExercise } = require('../../models/workout_exercises_model')
@@ -54,6 +55,11 @@ exports.getAllFood=  async function (req, res) {
             })
             res.status(200).json(result)
 
+        }
+        else if (req.body.category == FoodCategory.Supplement)
+        {
+            let data = await Supplement.find(searchFilter).skip(skip).limit(limit)
+            res.status(200).json(data)
         }
     }
     catch (err) {

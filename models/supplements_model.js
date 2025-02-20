@@ -1,12 +1,12 @@
 
 var mongoose = require('mongoose');
 const {DietApp} = require('../utility/connection');
-var SupplymentsSchema = new mongoose.Schema({
+var SupplementSchema = new mongoose.Schema({
     name: {type: String,default :null},
 },
 { timestamps: true });
 
-const Supplyment = DietApp.model('Supplyment', SupplymentsSchema);
+const Supplement = DietApp.model('Supplement', SupplementSchema);
 module.exports = {
-    Supplyment
+    Supplement
 };
