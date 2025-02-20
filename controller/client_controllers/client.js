@@ -80,7 +80,8 @@ exports.login = async function (req, res) {
     const { passwordHash, otpCode, otpCode_timestamp, ...updatedData } = data;
     //login work
     await User.updateOne({ _id: data._id }, { isLogin: true })
-    return res.status(200).json({ token: token, isNewUser: data.isNewUser, userData: updatedData });
+    let formdata = await Form.findOne({client_id:data._id})
+    return res.status(200).json({ token: token, isNewUser: data.isNewUser, userData: updatedData,formdata:formdata });
   }
   catch (err) {
     console.log(err)
