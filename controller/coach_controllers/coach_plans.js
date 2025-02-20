@@ -6,10 +6,11 @@ const { DietPlan } = require('../../models/dietPlan_model')
 const { WorkoutExercise } = require('../../models/workout_exercises_model')
 const { WorkoutPlan } = require('../../models/workoutPlan_model')
 const { Form } = require('../../models/form_model')
-const {FoodMeals,FoodCategory,DietPlanStatus,WorkoutPlanStatus, Roles} = require("../../Helpers/constants")
+const {FoodMeals,FoodCategory,DietPlanStatus,WorkoutPlanStatus, Roles,Plan_Status} = require("../../Helpers/constants")
 const {calculateTotalNutrientsForPlan} = require("../../Helpers/helperFunction")
 const JWT = require("jsonwebtoken");
 const mongoose = require('mongoose');
+const { User } = require('../../models/client_model')
 
 exports.getMealsAndCategory = async function (req, res) {
     try {
@@ -95,11 +96,12 @@ exports.createDietPlan=  async function (req, res) {
             res.status(401).json({message:"Please Provide status"})
         }
         if (req.body.status === DietPlanStatus.Active) {
-            // Deactivate all other plans for the client before activating a new one
             await DietPlan.updateMany(
                 { client_id: req.body.client_id, status: DietPlanStatus.Active },
                 { $set: { status: DietPlanStatus.Saved } }
             );
+            await User.updateOne({_id:req.body.client_id},{$set:{diet_plan_status:Plan_Status.AllReady}})
+
         }
         await DietPlan.create(req.body)
 
@@ -135,6 +137,8 @@ exports.editDietPlan=  async function (req, res) {
                 { client_id: req.body.client_id, status: DietPlanStatus.Active },
                 { $set: { status: DietPlanStatus.Saved } }
             );
+            await User.updateOne({_id:req.body.client_id},{$set:{diet_plan_status:Plan_Status.AllReady}})
+
         }
         const updatedDietPlan = await DietPlan.findByIdAndUpdate(
             id, 
@@ -212,7 +216,7 @@ exports.getAllDietPlans=  async function (req, res) {
                             totalRecipeNutrients.TotalProtein += (foodItem.protein * ingredient.quantity) || 0;
                             totalRecipeNutrients.TotalCarbohydrates += (foodItem.carbohydrates * ingredient.quantity) || 0;
                         });
-                        item.totalRecipeNutrients = totalRecipeNutrients;
+                        item.referenceId.totalRecipeNutrients = totalRecipeNutrients;
                         totalNutrientsMeal.TotalCalories += totalRecipeNutrients.TotalCalories;
                         totalNutrientsMeal.TotalFat += totalRecipeNutrients.TotalFat;
                         totalNutrientsMeal.TotalProtein += totalRecipeNutrients.TotalProtein;
@@ -344,6 +348,14 @@ exports.createWorkoutPlan=  async function (req, res) {
         {
             res.status(401).json({message:"Please Provide status"})
         }
+        if (req.body.status === WorkoutPlanStatus.Active) {
+            await WorkoutPlan.updateMany(
+                { client_id: req.body.client_id, status: WorkoutPlanStatus.Active },
+                { $set: { status: WorkoutPlanStatus.Saved } }
+            );
+            await User.updateOne({_id:req.body.client_id},{$set:{workout_plan_status:Plan_Status.AllReady}})
+
+        }
         await WorkoutPlan.create(req.body)
         res.status(200).json({message:"Workout plan created"})
 
@@ -370,6 +382,14 @@ exports.editWorkoutPlan=  async function (req, res) {
         {
             res.status(401).json({message:"Please Provide status"})
         } 
+        if (req.body.status === WorkoutPlanStatus.Active) {
+            await WorkoutPlan.updateMany(
+                { client_id: req.body.client_id, status: WorkoutPlanStatus.Active },
+                { $set: { status: WorkoutPlanStatus.Saved } }
+            );
+            await User.updateOne({_id:req.body.client_id},{$set:{workout_plan_status:Plan_Status.AllReady}})
+
+        }
         const updatedWorkOutPlan = await WorkoutPlan.findByIdAndUpdate(
             id, 
             updateData, 
