@@ -44,14 +44,14 @@ exports.getAllFood=  async function (req, res) {
                     const foodItem = ingredient.foodItem
                     if(foodItem)
                     {
-                        acc.calories += foodItem.calories || 0;
-                        acc.fat += foodItem.fat || 0;
-                        acc.protein += foodItem.protein || 0;
-                        acc.carbohydrates += foodItem.carbohydrates || 0;
+                        acc.TotalCalories += foodItem.calories || 0;
+                        acc.TotalFat += foodItem.fat || 0;
+                        acc.TotalProtein += foodItem.protein || 0;
+                        acc.TotalCarbohydrates += foodItem.carbohydrates || 0;
                         
                     }
                     return acc
-                },{calories:0,fat:0,protein:0,carbohydrates:0})
+                },{TotalCalories:0,TotalFat:0,TotalProtein:0,TotalCarbohydrates:0})
                 return {...recipe,totalRecipeNutrients:total}
             })
             res.status(200).json(result)
