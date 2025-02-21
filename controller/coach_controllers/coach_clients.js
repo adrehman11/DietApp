@@ -694,9 +694,9 @@ const getCounts = async (coach) => {
 
         // Store the separate counts and the total combined count
         counts[status] = {
-            workout: workoutCount,
-            diet: dietCount,
-            total: workoutCount + dietCount // Ensuring users with both statuses are counted twice
+            "Workout Plans": workoutCount,
+            "Diet Plans": dietCount,
+            Total: workoutCount + dietCount // Ensuring users with both statuses are counted twice
         };
     }
 
