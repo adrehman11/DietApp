@@ -52,7 +52,7 @@ exports.getAllFood=  async function (req, res) {
                     }
                     return acc
                 },{calories:0,fat:0,protein:0,carbohydrates:0})
-                return {...recipe,totalNutrients:total}
+                return {...recipe,totalRecipeNutrients:total}
             })
             res.status(200).json(result)
 
