@@ -66,7 +66,13 @@ exports.getScheduleCheckData = async function (req, res) {
             matchQuery = {
                 status: "Completed",  // Filter for completed check-ins
                 coach_id:coach._id,
+                // client_id:req.body.client_id,
                 type:req.body.type
+            }
+            if (req.body.client_id && mongoose.isValidObjectId(req.body.client_id)) {
+                matchQuery.client_id = new mongoose.Types.ObjectId(req.body.client_id);
+            } else if (req.body.client_id) {
+                return res.status(400).json({ message: "Invalid client_id" });
             }
         }
         else if (coach.role == Roles.teamLead) {

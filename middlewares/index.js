@@ -545,6 +545,7 @@ exports.getAllScheduleCheckIn = (req, res, next) => {
 };
 const scheduleCheckInByTypeSchema = JOI.object().keys({
   type: JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
+  client_id:JOI.string().required(),
 });
 
 exports.scheduleCheckInByType = (req, res, next) => {
