@@ -1,5 +1,6 @@
 
 var mongoose = require('mongoose');
+const {Plan_Status} = require("../Helpers/constants")
 const {DietApp} = require('../utility/connection');
 var bcrypt = require('bcrypt-nodejs');
 var UserSchema = new mongoose.Schema({
@@ -17,8 +18,8 @@ var UserSchema = new mongoose.Schema({
     coach_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Coach' },
     workoutCoach_id:{ type: mongoose.Schema.Types.ObjectId, ref: 'Coach' },
     diet_plan_status: {type: String,default :null},
-    workout_plan_status: {type: String,default :null},
-    subsctiption_status: {type: String,default :null},
+    workout_plan_status: {type: String,default :Plan_Status.FirstPlanNeeded},
+    subsctiption_status: {type: String,default :Plan_Status.FirstPlanNeeded},
 },
 { timestamps: true });
 

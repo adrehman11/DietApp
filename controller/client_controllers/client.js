@@ -397,6 +397,11 @@ exports.ScheduleCheckInTrackDiet = async function (req, res) {
     if (req.file) {
       req.body.bodyImages =  req.file.location
     }
+    let data = await ScheduleCheckIn.findOne({_id:  req.body.schedule_id})
+    if(data.status == "Completed" )
+    {
+      return res.status(400).json({msg:"CheckIn  Already completed"})
+    }
     await ScheduleCheckInTrack.create(req.body)
     await ScheduleCheckIn.updateOne({ _id:  req.body.schedule_id}, { status:"Completed"})
     return res.status(200).json({msg:"CheckIn Completed"})
@@ -410,6 +415,11 @@ exports.ScheduleCheckInTrackWorkout = async function (req, res) {
   try {
     let client = req.user
     req.body.client_id = client._id
+    let data = await ScheduleCheckIn.findOne({_id:  req.body.schedule_id})
+    if(data.status == "Completed" )
+    {
+      return res.status(400).json({msg:"CheckIn  Already completed"})
+    }
     await ScheduleCheckInTrack.create(req.body)
     await ScheduleCheckIn.updateOne({ _id:  req.body.schedule_id}, { status:"Completed"})
     return res.status(200).json({msg:"CheckIn Completed"})

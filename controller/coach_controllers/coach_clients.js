@@ -12,6 +12,7 @@ exports.getClientsByFilter = async function (req, res) {
         const pageSize = req.body.pageSize || 10;
         const skip = (page - 1) * pageSize;
 
+
         if (req.body.type === "All") {
             if(req.body.filter == "")
             {
@@ -36,7 +37,6 @@ exports.getClientsByFilter = async function (req, res) {
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
-    
                 // Extract user IDs to fetch associated form data
                 const userIds = users.map((user) => user._id);
     
@@ -48,6 +48,7 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
+                const counts = await getCounts(coach);
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -55,17 +56,14 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json(responseData);
+                return res.status(200).json({responseData,counts});
             }
-            else if (req.body.filter == "First Plan Needed")
+            else if (req.body.filter == Plan_Status.FirstPlanNeeded)
             {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        $or:[{ workout_plan_status: Plan_Status.FirstPlanNeeded},{ diet_plan_status: Plan_Status.FirstPlanNeeded}]
-                       
-                       
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{$or:[{ workout_plan_status: Plan_Status.FirstPlanNeeded},{ diet_plan_status: Plan_Status.FirstPlanNeeded}]}]      
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = {
@@ -76,7 +74,7 @@ exports.getClientsByFilter = async function (req, res) {
                 // Fetch users with pagination
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "full_name diet_plan_status workout_plan_status subsctiption_status coach_id workoutCoach_id"
                     )
                     .populate({ path: "coach_id", select: "_id full_name email role U_ID" })
                     .populate({
@@ -98,6 +96,7 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
+                const counts = await getCounts(coach);
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -105,17 +104,14 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json(responseData);
+                return res.status(200).json({responseData,counts});
             }
-            else if (req.body.filter = "Update Needed")
+            else if (req.body.filter = Plan_Status.UpdateNeeded)
             {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        $or:[{ workout_plan_status: Plan_Status.UpdateNeeded},{ diet_plan_status: Plan_Status.UpdateNeeded}]
-                       
-                       
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{ $or:[{ workout_plan_status: Plan_Status.UpdateNeeded},{ diet_plan_status: Plan_Status.UpdateNeeded}]}]       
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = {
@@ -150,22 +146,22 @@ exports.getClientsByFilter = async function (req, res) {
                 }, {});
     
                 // Attach the form data to the corresponding user
+                const counts = await getCounts(coach);
+    
+                // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json(responseData);
+                return res.status(200).json({responseData,counts});
             }
-            else if (req.body.filter = "All Ready")
+            else if (req.body.filter =Plan_Status.AllReady)
             {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        $or:[{ workout_plan_status: Plan_Status.AllReady},{ diet_plan_status: Plan_Status.AllReady}]
-                       
-                       
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{ $or:[{workout_plan_status: Plan_Status.AllReady},{ diet_plan_status: Plan_Status.AllReady}]}]               
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = {
@@ -199,13 +195,15 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
     
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json(responseData);
+                return res.status(200).json({responseData,counts});
             }
            
         } else if (req.body.type === "Workout Plans") {
@@ -219,8 +217,7 @@ exports.getClientsByFilter = async function (req, res) {
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        workout_plan_status: { $in: statusesToMatch },
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{workout_plan_status: { $in: statusesToMatch }}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { workout_plan_status: { $in: statusesToMatch } };
@@ -253,19 +250,20 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
 
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
-
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "First Plan Needed") {
+    
+                return res.status(200).json({responseData,counts});
+            } else if (req.body.filter === Plan_Status.FirstPlanNeeded) {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        workout_plan_status: Plan_Status.FirstPlanNeeded,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{workout_plan_status: Plan_Status.FirstPlanNeeded}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { workout_plan_status: Plan_Status.FirstPlanNeeded };
@@ -297,20 +295,20 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
-
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "Update Needed") {
+    
+                return res.status(200).json({responseData,counts});
+            } else if (req.body.filter === Plan_Status.UpdateNeeded) {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        workout_plan_status: Plan_Status.UpdateNeeded,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{workout_plan_status: Plan_Status.UpdateNeeded}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { workout_plan_status: Plan_Status.UpdateNeeded };
@@ -342,20 +340,20 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
-
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "All Ready") {
+    
+                return res.status(200).json({responseData,counts});
+            } else if (req.body.filter === Plan_Status.AllReady) {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        workout_plan_status: Plan_Status.AllReady,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{workout_plan_status: Plan_Status.AllReady}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { workout_plan_status: Plan_Status.AllReady };
@@ -387,14 +385,15 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
-
-                return res.status(200).json(responseData);
+    
+                return res.status(200).json({responseData,counts});
             } else {
                 return res.status(200).json({ msg: "No Filter Selected " });
             }
@@ -409,8 +408,7 @@ exports.getClientsByFilter = async function (req, res) {
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        diet_plan_status: { $in: statusesToMatch },
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{diet_plan_status: { $in: statusesToMatch }}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { diet_plan_status: { $in: statusesToMatch } };
@@ -444,21 +442,21 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
-
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "First Plan Needed") {
+    
+                return res.status(200).json({responseData,counts});
+            } else if (req.body.filter === Plan_Status.FirstPlanNeeded) {
                 let query = {};
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        diet_plan_status: Plan_Status.FirstPlanNeeded,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{diet_plan_status: Plan_Status.FirstPlanNeeded}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { diet_plan_status: Plan_Status.FirstPlanNeeded };
@@ -491,20 +489,21 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
 
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
-
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "Update Needed") {
+    
+                return res.status(200).json({responseData,counts});
+            } else if (req.body.filter === Plan_Status.UpdateNeeded) {
                 let query = {};
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        diet_plan_status: Plan_Status.UpdateNeeded,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{diet_plan_status: Plan_Status.UpdateNeeded}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { diet_plan_status: Plan_Status.UpdateNeeded };
@@ -537,20 +536,21 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
 
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
-
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "All Ready") {
+    
+                return res.status(200).json({responseData,counts});
+            } else if (req.body.filter === Plan_Status.AllReady) {
                 let query = {};
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        diet_plan_status: Plan_Status.AllReady,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{diet_plan_status: Plan_Status.AllReady}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { diet_plan_status: Plan_Status.AllReady };
@@ -582,14 +582,15 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
-
-                return res.status(200).json(responseData);
+    
+                return res.status(200).json({responseData,counts});
             } else {
                 return res.status(200).json({ msg: "No Filter Selected " });
             }
@@ -653,4 +654,51 @@ exports.getAllCoach = async function (req, res) {
         console.log(err);
         res.status(500).json(err);
     }
+};
+
+const getCounts = async (coach) => {
+    const statuses = [
+        Plan_Status.FirstPlanNeeded,
+        Plan_Status.UpdateNeeded,
+        Plan_Status.AllReady
+    ];
+
+    let counts = {};
+
+    for (let status of statuses) {
+        let workoutQuery = {};
+        let dietQuery = {};
+
+        if (coach.role === Roles.coach) {
+            workoutQuery = {
+                $and: [
+                    { $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }] },
+                    { workout_plan_status: status }
+                ]
+            };
+
+            dietQuery = {
+                $and: [
+                    { $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }] },
+                    { diet_plan_status: status }
+                ]
+            };
+        } else if (coach.role === Roles.teamLead) {
+            workoutQuery = { workout_plan_status: status };
+            dietQuery = { diet_plan_status: status };
+        }
+
+        // Count separately for workout and diet plans
+        const workoutCount = await User.countDocuments(workoutQuery);
+        const dietCount = await User.countDocuments(dietQuery);
+
+        // Store the separate counts and the total combined count
+        counts[status] = {
+            workout: workoutCount,
+            diet: dietCount,
+            total: workoutCount + dietCount // Ensuring users with both statuses are counted twice
+        };
+    }
+
+    return counts;
 };

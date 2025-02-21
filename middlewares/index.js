@@ -1,5 +1,5 @@
 const JOI = require("@hapi/joi");
-const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType, Roles } = require("../Helpers/constants")
+const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType, Roles,Plan_Status } = require("../Helpers/constants")
 
 const loginSchema = JOI.object().keys({
   email: JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
@@ -482,7 +482,7 @@ const getAllClientsByFilterSchema = JOI.object().keys({
   page: JOI.number().required(),
   pageSize: JOI.number().required(),
   type:JOI.string().required(),
-  filter:JOI.string().allow("")
+  filter:JOI.string().valid("",Plan_Status.AllReady,Plan_Status.UpdateNeeded,Plan_Status.FirstPlanNeeded).allow("")
 });
 
 exports.getAllClientsByFilter = (req, res, next) => {
@@ -560,16 +560,16 @@ exports.scheduleCheckInByType = (req, res, next) => {
 const scheduleCheckInTrackDietSchema = JOI.object().keys({
   schedule_id:JOI.string().required(),
     // client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
-    committementLevel :JOI.string().allow(),
-    weight :JOI.string().allow(),
+    committementLevel :JOI.string().required(),
+    weight :JOI.string().required(),
     // bodyImages:JOI.string().allow(),
-    chestMeasurement:JOI.string().allow(),
-    stomachMeasurement:JOI.string().allow(),
-    waistMeasurement:JOI.string().allow(),
-    hipsMeasurement:JOI.string().allow(),
-    thighMeasurement:JOI.string().allow(),
-    calvesMeasurement:JOI.string().allow(),
-    reviewExperience:JOI.string().allow(),
+    chestMeasurement:JOI.string().required(),
+    stomachMeasurement:JOI.string().required(),
+    waistMeasurement:JOI.string().required(),
+    hipsMeasurement:JOI.string().required(),
+    thighMeasurement:JOI.string().required(),
+    calvesMeasurement:JOI.string().required(),
+    reviewExperience:JOI.string().required(),
 });
 
 exports.scheduleCheckInTrackDiet = (req, res, next) => {
