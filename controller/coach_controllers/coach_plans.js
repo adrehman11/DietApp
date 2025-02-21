@@ -211,10 +211,10 @@ exports.getAllDietPlans=  async function (req, res) {
                         item.referenceId.ingredients.forEach(ingredient => {
                             const foodItem = ingredient.foodItem;
                             
-                            totalRecipeNutrients.TotalCalories += (foodItem.calories * ingredient.quantity) || 0;
-                            totalRecipeNutrients.TotalFat += (foodItem.fat * ingredient.quantity) || 0;
-                            totalRecipeNutrients.TotalProtein += (foodItem.protein * ingredient.quantity) || 0;
-                            totalRecipeNutrients.TotalCarbohydrates += (foodItem.carbohydrates * ingredient.quantity) || 0;
+                            totalRecipeNutrients.TotalCalories += (foodItem.calories * ingredient.quantity * item.quantity) || 0;
+                            totalRecipeNutrients.TotalFat += (foodItem.fat * ingredient.quantity * item.quantity) || 0;
+                            totalRecipeNutrients.TotalProtein += (foodItem.protein * ingredient.quantity * item.quantity) || 0;
+                            totalRecipeNutrients.TotalCarbohydrates += (foodItem.carbohydrates * ingredient.quantity * item.quantity) || 0;
                         });
                         item.referenceId.totalRecipeNutrients = totalRecipeNutrients;
                         totalNutrientsMeal.TotalCalories += totalRecipeNutrients.TotalCalories;
