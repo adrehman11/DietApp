@@ -14,7 +14,7 @@ exports.getClientsByFilter = async function (req, res) {
 
 
         if (req.body.type === "All") {
-            if(req.body.filter == "")
+            if(req.body.filter === "")
             {
                 let query = {};
                 if (coach.role == Roles.coach) {
@@ -58,7 +58,7 @@ exports.getClientsByFilter = async function (req, res) {
     
                 return res.status(200).json({responseData,counts});
             }
-            else if (req.body.filter == Plan_Status.FirstPlanNeeded)
+            else if (req.body.filter === Plan_Status.FirstPlanNeeded)
             {
                 let query = {};
                 if (coach.role == Roles.coach) {
@@ -106,7 +106,7 @@ exports.getClientsByFilter = async function (req, res) {
     
                 return res.status(200).json({responseData,counts});
             }
-            else if (req.body.filter = Plan_Status.UpdateNeeded)
+            else if (req.body.filter === Plan_Status.UpdateNeeded)
             {
                 let query = {};
                 if (coach.role == Roles.coach) {
@@ -156,14 +156,18 @@ exports.getClientsByFilter = async function (req, res) {
     
                 return res.status(200).json({responseData,counts});
             }
-            else if (req.body.filter =Plan_Status.AllReady)
+            else if (req.body.filter ===Plan_Status.AllReady)
             {
                 let query = {};
                 if (coach.role == Roles.coach) {
+                    console.log("asdad")
+
                     query = {
                         $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{ $or:[{workout_plan_status: Plan_Status.AllReady},{ diet_plan_status: Plan_Status.AllReady}]}]               
                     };
                 } else if (coach.role == Roles.teamLead) {
+                    console.log("sss")
+
                     query = {
                         $or: [{ workout_plan_status: Plan_Status.AllReady},{ diet_plan_status: Plan_Status.AllReady}],
 
