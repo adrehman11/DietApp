@@ -164,13 +164,11 @@ exports.getClientsByFilter = async function (req, res) {
             {
                 let query = {};
                 if (coach.role == Roles.coach) {
-                    console.log("asdad")
 
                     query = {
                         $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{ $or:[{workout_plan_status: Plan_Status.AllReady},{ diet_plan_status: Plan_Status.AllReady}]}]               
                     };
                 } else if (coach.role == Roles.teamLead) {
-                    console.log("sss")
 
                     query = {
                         $or: [{ workout_plan_status: Plan_Status.AllReady},{ diet_plan_status: Plan_Status.AllReady}],
@@ -432,7 +430,7 @@ exports.getClientsByFilter = async function (req, res) {
                     query = { diet_plan_status: { $in: statusesToMatch } };
                 }
 
-                query = { diet_plan_status: { $in: statusesToMatch } };
+                // query = { diet_plan_status: { $in: statusesToMatch } };
                 const users = await User.find(query)
                     .select(
                         "full_name diet_plan_status workout_plan_status subsctiption_status"
