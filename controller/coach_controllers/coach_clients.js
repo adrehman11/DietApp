@@ -49,14 +49,14 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
                 const counts = await getCounts(coach);
-    
+                const TotalDocuments = await User.countDocuments(query)
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
             }
             else if (req.body.filter === Plan_Status.FirstPlanNeeded)
             {
@@ -97,6 +97,7 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -104,7 +105,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             }
             else if (req.body.filter === Plan_Status.UpdateNeeded)
             {
@@ -147,6 +149,7 @@ exports.getClientsByFilter = async function (req, res) {
     
                 // Attach the form data to the corresponding user
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -154,7 +157,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             }
             else if (req.body.filter ===Plan_Status.AllReady)
             {
@@ -200,6 +204,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }, {});
     
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -207,7 +212,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             }
            
         } else if (req.body.type === "Workout Plans") {
@@ -255,6 +261,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }, {});
 
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -262,7 +269,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             } else if (req.body.filter === Plan_Status.FirstPlanNeeded) {
                 let query = {};
                 if (coach.role == Roles.coach) {
@@ -300,6 +308,7 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -307,7 +316,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             } else if (req.body.filter === Plan_Status.UpdateNeeded) {
                 let query = {};
                 if (coach.role == Roles.coach) {
@@ -345,6 +355,7 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -352,7 +363,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             } else if (req.body.filter === Plan_Status.AllReady) {
                 let query = {};
                 if (coach.role == Roles.coach) {
@@ -390,6 +402,7 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -397,7 +410,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             } else {
                 return res.status(200).json({ msg: "No Filter Selected " });
             }
@@ -447,6 +461,7 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -454,7 +469,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             } else if (req.body.filter === Plan_Status.FirstPlanNeeded) {
                 let query = {};
 
@@ -494,6 +510,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }, {});
 
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -501,7 +518,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             } else if (req.body.filter === Plan_Status.UpdateNeeded) {
                 let query = {};
 
@@ -541,6 +559,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }, {});
 
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -548,7 +567,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             } else if (req.body.filter === Plan_Status.AllReady) {
                 let query = {};
 
@@ -587,6 +607,7 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
                 const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
     
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
@@ -594,7 +615,8 @@ exports.getClientsByFilter = async function (req, res) {
                     formData: formsMap[user._id.toString()] || null,
                 }));
     
-                return res.status(200).json({responseData,counts});
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
             } else {
                 return res.status(200).json({ msg: "No Filter Selected " });
             }
