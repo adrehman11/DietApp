@@ -50,10 +50,10 @@ exports.getAllFood = async function (req, res) {
           (acc, ingredient) => {
             const foodItem = ingredient.foodItem;
             if (foodItem) {
-              acc.TotalCalories += foodItem.calories || 0;
-              acc.TotalFat += foodItem.fat || 0;
-              acc.TotalProtein += foodItem.protein || 0;
-              acc.TotalCarbohydrates += foodItem.carbohydrates || 0;
+              acc.TotalCalories += foodItem.calories * ingredient.quantity  || 0;
+              acc.TotalFat += foodItem.fat  * ingredient.quantity || 0;
+              acc.TotalProtein += foodItem.protein  * ingredient.quantity  || 0;
+              acc.TotalCarbohydrates += foodItem.carbohydrates  * ingredient.quantity  || 0;
             }
             return acc;
           },
