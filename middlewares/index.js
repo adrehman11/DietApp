@@ -728,3 +728,44 @@ exports.getSupportTicketChatById = (req, res, next) => {
     next();
   }
 };
+
+const getAllFoodItemsSchema = JOI.object().keys({
+  page: JOI.number().optional(),
+  pageSize: JOI.number().optional(),
+  search:JOI.string().optional(),
+});
+
+exports.getAllFoodItems = (req, res, next) => {
+  const result = getAllFoodItemsSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const getAllFoodRecipeSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+});
+
+exports.getAllFoodRecipe = (req, res, next) => {
+  const result = getAllFoodRecipeSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const AddSupplementSchema = JOI.object().keys({
+  name: JOI.string().required(),
+});
+
+exports.AddSupplement = (req, res, next) => {
+  const result = AddSupplementSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};

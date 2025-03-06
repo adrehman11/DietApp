@@ -670,7 +670,7 @@ exports.getAllCoach = async function (req, res) {
             : { role: Roles.coach };
         let data = await Coach.find(searchFilter)
             .skip(skip)
-            .limit(page)
+            .limit(pageSize)
             .select("full_name bio status email U_ID");
 
         return res.status(200).json(data);
