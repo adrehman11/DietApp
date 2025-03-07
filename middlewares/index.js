@@ -787,7 +787,7 @@ exports.getTeamLeadClientsByFilter = (req, res, next) => {
 };
 const getAllPlansByFilterSchema = JOI.object().keys({
   filter:JOI.string().valid("","Diet Plans","Workout Plans").allow(""),
-  search:JOI.string().optional(),
+  search:JOI.string().allow(""),
   page:JOI.number().required(),
   pageSize:JOI.number().required()
 });

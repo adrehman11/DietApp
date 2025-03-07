@@ -466,7 +466,7 @@ exports.getAllPlansByCoach = async function (req, res) {
     let query = { coach_id: coach._id };
 
     if (req.body.filter == "") {
-      if (req.body.search) {
+      if (req.body.search != "") {
         const matchingClients = await User.find({
           full_name: { $regex: req.body.search, $options: "i" }, // Case-insensitive search
         })
@@ -534,7 +534,7 @@ exports.getAllPlansByCoach = async function (req, res) {
         },
       });
     } else if (req.body.filter == "Diet Plans") {
-      if (req.body.search) {
+      if (req.body.search != "") {
         const matchingClients = await User.find({
           full_name: { $regex: req.body.search, $options: "i" }, // Case-insensitive search
         })
@@ -586,7 +586,7 @@ exports.getAllPlansByCoach = async function (req, res) {
         },
       });
     } else if (req.body.filter == "Workout Plans") {
-      if (req.body.search) {
+      if (req.body.search != "") {
         const matchingClients = await User.find({
           full_name: { $regex: req.body.search, $options: "i" }, // Case-insensitive search
         })
