@@ -4,6 +4,7 @@ const AdminControllerFood = require("../../controller/admin_controllers/admin_fo
 const AdminControllerExercise = require("../../controller/admin_controllers/admin_workout");
 const AdminControllerRoles = require("../../controller/admin_controllers/admin_roles");
 const AdminControllerListing = require("../../controller/admin_controllers/admin_listing");
+
 const { Roles } = require("../../Helpers/constants");
 
 // const Coach_client_Controller = require("../../controller/coach_controllers/coach_clients");
@@ -19,6 +20,8 @@ const {
   AddRole,
   getAllFoodRecipe,
   AddSupplement,
+  getCoachAdminData,
+  getAllCoach,
   login
   } = require("../../middlewares/index");
 
@@ -41,7 +44,10 @@ const {
 
 
 //coach
-Router.post('/getAllCoach',authorization([Roles.admin]),getAllFoodItems,AdminControllerListing.getAllcoach);
+Router.post('/getAllCoach',authorization([Roles.admin]),getAllCoach,AdminControllerListing.getAllCoach);
+Router.post('/getCoachAdminData',authorization([Roles.admin]),getCoachAdminData,AdminControllerListing.getCoachAdminData);
+Router.post('/getAllTeamLeads',authorization([Roles.admin]),getAllCoach,AdminControllerListing.getAllTeamleads);
+
 
   
   

@@ -801,3 +801,30 @@ exports.getAllPlansByFilter = (req, res, next) => {
   }
 };
 
+const getAllCoachSchema = JOI.object().keys({
+  search:JOI.string().allow(""),
+  page:JOI.number().required(),
+  pageSize:JOI.number().required()
+});
+
+exports.getAllCoach = (req, res, next) => {
+  const result = getAllCoachSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const getCoachAdminDataSchema = JOI.object().keys({
+  _id:JOI.string().required(),
+});
+
+exports.getCoachAdminData = (req, res, next) => {
+  const result = getCoachAdminDataSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
