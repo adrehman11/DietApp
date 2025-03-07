@@ -3,6 +3,7 @@ const Router = express.Router();
 const AdminControllerFood = require("../../controller/admin_controllers/admin_food");
 const AdminControllerExercise = require("../../controller/admin_controllers/admin_workout");
 const AdminControllerRoles = require("../../controller/admin_controllers/admin_roles");
+const AdminControllerListing = require("../../controller/admin_controllers/admin_listing");
 const { Roles } = require("../../Helpers/constants");
 
 // const Coach_client_Controller = require("../../controller/coach_controllers/coach_clients");
@@ -39,6 +40,8 @@ const {
   Router.post('/addRoll',authorization([Roles.admin]),upload.single("image"),AddRole,AdminControllerRoles.AddRoles);
 
 
+//coach
+Router.post('/getAllCoach',authorization([Roles.admin]),getAllFoodItems,AdminControllerListing.getAllcoach);
 
   
   

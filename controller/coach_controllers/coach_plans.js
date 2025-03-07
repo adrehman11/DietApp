@@ -50,10 +50,11 @@ exports.getAllFood = async function (req, res) {
           (acc, ingredient) => {
             const foodItem = ingredient.foodItem;
             if (foodItem) {
-              acc.TotalCalories += foodItem.calories * ingredient.quantity  || 0;
-              acc.TotalFat += foodItem.fat  * ingredient.quantity || 0;
-              acc.TotalProtein += foodItem.protein  * ingredient.quantity  || 0;
-              acc.TotalCarbohydrates += foodItem.carbohydrates  * ingredient.quantity  || 0;
+              acc.TotalCalories += foodItem.calories * ingredient.quantity || 0;
+              acc.TotalFat += foodItem.fat * ingredient.quantity || 0;
+              acc.TotalProtein += foodItem.protein * ingredient.quantity || 0;
+              acc.TotalCarbohydrates +=
+                foodItem.carbohydrates * ingredient.quantity || 0;
             }
             return acc;
           },
@@ -82,7 +83,7 @@ exports.createDietPlan = async function (req, res) {
     let coach = req.user;
     if (coach.role == Roles.coach) {
       req.body.coach_id = coach.id;
-    } else if (coach.role == Roles.teamLead) {
+    } else if (coach.role == Roles.teamLead || coach.role == Roles.admin) {
       if (!req.body.coach_id) {
         throw "coach id is missing in payload";
       }
@@ -156,7 +157,7 @@ exports.getAllDietPlans = async function (req, res) {
     let query = {};
     if (coach.role == Roles.coach) {
       query = { coach_id: coach._id, client_id: req.body.client_id };
-    } else if (coach.role == Roles.teamLead) {
+    } else if (coach.role == Roles.teamLead || coach.role == Roles.admin) {
       query = { client_id: req.body.client_id };
     }
     let data = await DietPlan.find(query)
@@ -181,8 +182,8 @@ exports.getAllDietPlans = async function (req, res) {
         select: "_id full_name email role U_ID",
       })
       .lean();
-      const TotalDocuments = await DietPlan.countDocuments(query)
-    
+    const TotalDocuments = await DietPlan.countDocuments(query);
+
     for (let plan of data) {
       let formData = await Form.findOne({
         client_id: plan.client_id._id,
@@ -244,7 +245,9 @@ exports.getAllDietPlans = async function (req, res) {
       });
     });
 
-    return res.status(200).json({dietPlansWithNutrients,TotalDocuments,page,pageSize});
+    return res
+      .status(200)
+      .json({ dietPlansWithNutrients, TotalDocuments, page, pageSize });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
@@ -334,7 +337,7 @@ exports.createWorkoutPlan = async function (req, res) {
 
     if (coach.role == Roles.coach) {
       req.body.coach_id = coach.id;
-    } else if (coach.role == Roles.teamLead) {
+    } else if (coach.role == Roles.teamLead || coach.role == Roles.admin) {
       if (!req.body.coach_id) {
         throw "coach id is missing in payload";
       }
@@ -407,7 +410,7 @@ exports.getAllWorkoutplan = async function (req, res) {
     let query = {};
     if (coach.role == Roles.coach) {
       query = { coach_id: coach._id, client_id: req.body.client_id };
-    } else if (coach.role == Roles.teamLead) {
+    } else if (coach.role == Roles.teamLead || coach.role == Roles.admin) {
       query = { client_id: req.body.client_id };
     }
     let data = await WorkoutPlan.find(query)
@@ -423,8 +426,8 @@ exports.getAllWorkoutplan = async function (req, res) {
         select: "_id full_name email role U_ID",
       })
       .lean();
-      const TotalDocuments = await WorkoutPlan.countDocuments(query)
-    return res.status(200).json({data,TotalDocuments,page,pageSize});
+    const TotalDocuments = await WorkoutPlan.countDocuments(query);
+    return res.status(200).json({ data, TotalDocuments, page, pageSize });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
@@ -448,6 +451,197 @@ exports.getWorkoutplanById = async function (req, res) {
     }
 
     res.status(200).json(data);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+
+exports.getAllPlansByCoach = async function (req, res) {
+  try {
+    let coach = req.user;
+    let page = req.body.page;
+    let pageSize = req.body.pageSize;
+    const skip = (page - 1) * pageSize;
+    let query = { coach_id: coach._id };
+
+    if (req.body.filter == "") {
+      if (req.body.search) {
+        const matchingClients = await User.find({
+          full_name: { $regex: req.body.search, $options: "i" }, // Case-insensitive search
+        })
+          .select("_id")
+          .lean();
+
+        // Extract client IDs
+        const clientIds = matchingClients.map((client) => client._id);
+
+        // Modify query to filter DietPlans and WorkoutPlans by client_id
+        query.client_id = { $in: clientIds };
+        // query= { coach_id: coach._id, full_name: { $regex: req.body.search, $options: "i" } }
+      }
+      const [dietPlans, workoutPlans] = await Promise.all([
+        DietPlan.find(query)
+          .populate({
+            path: "client_id",
+            select:
+              "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+          })
+          .populate({
+            path: "coach_id",
+            select: "_id full_name email role U_ID",
+          })
+          .lean(),
+
+        WorkoutPlan.find(query)
+          .populate({
+            path: "client_id",
+            select:
+              "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+          })
+          .populate({
+            path: "coach_id",
+            select: "_id full_name email role U_ID",
+          })
+          .lean(),
+      ]);
+      // Attach form data for each plan
+      for (let plan of [...dietPlans, ...workoutPlans]) {
+        let formData = await Form.findOne({
+          client_id: plan.client_id._id,
+        }).lean();
+        plan.client_id.form = formData || {}; // Attach form data to client
+      }
+
+      // Merge both results
+      const mergedData = [...dietPlans, ...workoutPlans];
+
+      // Sort merged data by createdAt (latest first)
+      mergedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const totalRecords = mergedData.length;
+
+      // Apply pagination manually using slice
+      const paginatedData = mergedData.slice(skip, skip + pageSize);
+      // Send response
+      return res.status(200).json({
+        success: true,
+        data: paginatedData,
+        meta: {
+          totalRecords,
+          currentPage: page,
+          pageSize,
+          totalPages: Math.ceil(totalRecords / pageSize),
+        },
+      });
+    } else if (req.body.filter == "Diet Plans") {
+      if (req.body.search) {
+        const matchingClients = await User.find({
+          full_name: { $regex: req.body.search, $options: "i" }, // Case-insensitive search
+        })
+          .select("_id")
+          .lean();
+
+        // Extract client IDs
+        const clientIds = matchingClients.map((client) => client._id);
+
+        // Modify query to filter DietPlans and WorkoutPlans by client_id
+        query.client_id = { $in: clientIds };
+        // query= { coach_id: coach._id, full_name: { $regex: req.body.search, $options: "i" } }
+      }
+      const [mergedData] = await Promise.all([
+        DietPlan.find(query)
+          .populate({
+            path: "client_id",
+            select:
+              "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+          })
+          .populate({
+            path: "coach_id",
+            select: "_id full_name email role U_ID",
+          })
+          .lean(),
+      ]);
+      // Attach form data for each plan
+      for (let plan of [...mergedData]) {
+        let formData = await Form.findOne({
+          client_id: plan.client_id._id,
+        }).lean();
+        plan.client_id.form = formData || {}; // Attach form data to client
+      }
+
+
+      // Sort merged data by createdAt (latest first)
+      mergedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const totalRecords = await DietPlan.countDocuments(query);
+      // Apply pagination manually using slice
+      // Send response
+      return res.status(200).json({
+        success: true,
+        data: mergedData,
+        meta: {
+          totalRecords,
+          currentPage: page,
+          pageSize,
+          totalPages: Math.ceil(totalRecords / pageSize),
+        },
+      });
+    } else if (req.body.filter == "Workout Plans") {
+      if (req.body.search) {
+        const matchingClients = await User.find({
+          full_name: { $regex: req.body.search, $options: "i" }, // Case-insensitive search
+        })
+          .select("_id")
+          .lean();
+
+        // Extract client IDs
+        const clientIds = matchingClients.map((client) => client._id);
+
+        // Modify query to filter DietPlans and WorkoutPlans by client_id
+        query.client_id = { $in: clientIds };
+        // query= { coach_id: coach._id, full_name: { $regex: req.body.search, $options: "i" } }
+      }
+      const [mergedData] = await Promise.all([
+        WorkoutPlan.find(query)
+          .populate({
+            path: "client_id",
+            select:
+              "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+          })
+          .populate({
+            path: "coach_id",
+            select: "_id full_name email role U_ID",
+          })
+          .lean(),
+      ]);
+      // Attach form data for each plan
+      for (let plan of [...mergedData]) {
+        let formData = await Form.findOne({
+          client_id: plan.client_id._id,
+        }).lean();
+        plan.client_id.form = formData || {}; // Attach form data to client
+      }
+
+
+      // Sort merged data by createdAt (latest first)
+      mergedData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+      const totalRecords = await WorkoutPlan.countDocuments(query);
+      // Apply pagination manually using slice
+      // Send response
+      return res.status(200).json({
+        success: true,
+        data: mergedData,
+        meta: {
+          totalRecords,
+          currentPage: page,
+          pageSize,
+          totalPages: Math.ceil(totalRecords / pageSize),
+        },
+      });
+    }
+    else
+    {
+      return res.status(400).json({msg:"Invalid filter"})
+    }
   } catch (err) {
     console.log(err);
     res.status(500).json(err);

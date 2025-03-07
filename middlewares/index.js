@@ -769,3 +769,35 @@ exports.AddSupplement = (req, res, next) => {
     next();
   }
 };
+
+const getTeamLeadClientsByFilterSchema = JOI.object().keys({
+  filter:JOI.string().valid("","Assigned Clients","Unassigned Clients").allow(""),
+  type:JOI.string().required(),
+  page:JOI.number().required(),
+  pageSize:JOI.number().required()
+});
+
+exports.getTeamLeadClientsByFilter = (req, res, next) => {
+  const result = getTeamLeadClientsByFilterSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const getAllPlansByFilterSchema = JOI.object().keys({
+  filter:JOI.string().valid("","Diet Plans","Workout Plans").allow(""),
+  search:JOI.string().optional(),
+  page:JOI.number().required(),
+  pageSize:JOI.number().required()
+});
+
+exports.getAllPlansByFilter = (req, res, next) => {
+  const result = getAllPlansByFilterSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+

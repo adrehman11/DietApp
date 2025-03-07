@@ -5,6 +5,105 @@ const { Roles, Form_Types, Plan_Status } = require("../../Helpers/constants");
 const JWT = require("jsonwebtoken");
 const mongoose = require("mongoose");
 
+exports.getTeamClientsByFilter = async function (req, res) {
+    try {
+        const coach = req.user;
+        const page = req.body.page || 1;
+        const pageSize = req.body.pageSize || 10;
+        const skip = (page - 1) * pageSize;
+        let query = {}
+
+        if (req.body.type === "All") {
+            if (req.body.filter === "") {
+
+                query = {}
+            }
+            else if (req.body.filter === "Assigned Clients") {
+                query = {
+                    $or: [{ coach_id: { $ne: null } }, { workoutCoach_id: { $ne: null } }]
+                }
+            }
+            else if (req.body.filter === "Unassigned Clients") {
+                query = {
+                    $or: [{ coach_id: null }, { workoutCoach_id: null }]
+                }
+
+            }
+
+        }
+        else if (req.body.type == "Workout Plans")
+        {
+            if (req.body.filter === "") {
+
+                query = {}
+            }
+            else if (req.body.filter === "Assigned Clients") {
+                query = {
+                     workoutCoach_id: { $ne: null } 
+                }
+            }
+            else if (req.body.filter === "Unassigned Clients") {
+                query = {
+                    workoutCoach_id: null 
+                }
+
+            }
+        }
+        else if (req.body.type == "Diet Plans")
+        {
+            if (req.body.filter === "") {
+
+                query = {}
+            }
+            else if (req.body.filter === "Assigned Clients") {
+                query = {
+                   coach_id: { $ne: null } 
+                }
+            }
+            else if (req.body.filter === "Unassigned Clients") {
+                query = {
+                   coach_id: null 
+                }
+
+            }
+        }
+
+        const users = await User.find(query)
+            .select(
+                "full_name diet_plan_status workout_plan_status subsctiption_status"
+            )
+            .populate({ path: "coach_id", select: "_id full_name email role U_ID" })
+            .populate({
+                path: "workoutCoach_id",
+                select: "_id full_name email role U_ID",
+            })
+            .limit(pageSize)
+            .skip(skip)
+            .exec(); // Extract user IDs to fetch associated form data
+        const userIds = users.map((user) => user._id);
+
+        // Fetch all forms in a single query
+        const forms = await Form.find({ client_id: { $in: userIds } }).exec();
+
+        // Create a map of form data by client_id for quick access
+        const formsMap = forms.reduce((acc, form) => {
+            acc[form.client_id.toString()] = form;
+            return acc;
+        }, {});
+        const counts = await getCountsTeamLeadCount();
+        const TotalDocuments = await User.countDocuments(query)
+        // Attach the form data to the corresponding user
+        const responseData = users.map((user) => ({
+            ...user.toObject(),
+            formData: formsMap[user._id.toString()] || null,
+        }));
+
+        return res.status(200).json({ responseData, counts, TotalDocuments, page, pageSize });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+};
 exports.getClientsByFilter = async function (req, res) {
     try {
         const coach = req.user;
@@ -725,4 +824,52 @@ const getCounts = async (coach) => {
     }
 
     return counts;
+};
+
+const getCountsTeamLeadCount = async () => {
+    const statuses = [
+        "Assigned Clients",
+        "UnAssigned Clients",
+    ];
+
+    let counts = {};
+
+    for (let status of statuses) {
+        let workoutQuery = {};
+        let dietQuery = {};
+        if (status == "Assigned Clients") {
+            workoutQuery = {
+                workoutCoach_id: { $ne: null }
+            };
+
+            dietQuery = {
+                coach_id: { $ne: null }
+            };
+        }
+        else if (status == "UnAssigned Clients") {
+            workoutQuery = {
+                workoutCoach_id: null
+            };
+
+            dietQuery = {
+                coach_id: null
+            };
+        }
+
+
+
+        // Count separately for workout and diet plans
+        const workoutCount = await User.countDocuments(workoutQuery);
+        const dietCount = await User.countDocuments(dietQuery);
+
+        // Store the separate counts and the total combined count
+        counts[status] = {
+            "Assigned Clients": workoutCount,
+            "UnAssigned Clients": dietCount,
+            "All": workoutCount + dietCount // Ensuring users with both statuses are counted twice
+        };
+    }
+
+    return counts;
+
 };

@@ -68,7 +68,28 @@ exports.getAllFoodRecipe = async function (req, res) {
         const skip = (page - 1) * pageSize;
     
         let data = await FoodRecipe.find().skip(skip).limit(pageSize) .populate({ path: "ingredients.foodItem" }).lean();
-        return res.status(200).json(data);
+        const result = data.map((recipe) => {
+            const total = recipe.ingredients.reduce(
+              (acc, ingredient) => {
+                const foodItem = ingredient.foodItem;
+                if (foodItem) {
+                  acc.TotalCalories += foodItem.calories * ingredient.quantity  || 0;
+                  acc.TotalFat += foodItem.fat  * ingredient.quantity || 0;
+                  acc.TotalProtein += foodItem.protein  * ingredient.quantity  || 0;
+                  acc.TotalCarbohydrates += foodItem.carbohydrates  * ingredient.quantity  || 0;
+                }
+                return acc;
+              },
+              {
+                TotalCalories: 0,
+                TotalFat: 0,
+                TotalProtein: 0,
+                TotalCarbohydrates: 0,
+              }
+            );
+            return { ...recipe, totalRecipeNutrients: total };
+          });
+        return res.status(200).json(result);
     }
     catch (err) {
         console.log(err)
