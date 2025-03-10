@@ -64,7 +64,8 @@ exports.getCoachAdminData = async function (req, res) {
 
     let dietPlansData = await DietPlan.find({coach_id: req.body._id })
     let workoutPlansData = await WorkoutPlan.find({coach_id: req.body._id })
-    return res.status(200).json({clients:responseData,dietPlansData,workoutPlansData});
+    let coachDetails = await Coach.findOne({_id:req.body._id}).select("full_name bio,status email role U_ID image")
+    return res.status(200).json({clients:responseData,dietPlansData,workoutPlansData,coachDetails});
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
