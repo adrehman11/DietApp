@@ -13,13 +13,12 @@ function authorization(allowedRoles = []) {
       token = token.split(" ")[1];
       let secret = process.env.jwtSecret;
       var decoded = JWT.verify(token, secret);
-
+      console.log(decoded)
       let user = await Coach.findOne({
         _id: decoded.id,
         role: { $in: [Roles.coach, Roles.teamLead, Roles.admin, Roles.staff, Roles.customerSupport] },
         isLogin: true
       });
-
       if (!user) {
         return res.status(401).json({
           msg: "Unauthorized. Please login again",

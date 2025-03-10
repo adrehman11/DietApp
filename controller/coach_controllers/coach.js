@@ -47,7 +47,7 @@ exports.assignCoach = async function (req, res) {
         let coach = req.user;
 
         // Check if the user is a Team Lead
-        if (coach.role !== Roles.teamLead || coach.role !== Roles.admin) {
+        if (coach.role !== Roles.teamLead && coach.role !== Roles.admin) {
             return res.status(400).json({ msg: "Not Authorized" });
         }
 
