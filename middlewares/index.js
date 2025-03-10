@@ -786,7 +786,7 @@ exports.AddSupplement = (req, res, next) => {
 
 const getTeamLeadClientsByFilterSchema = JOI.object().keys({
   filter:JOI.string().valid("","Assigned Clients","Unassigned Clients").allow(""),
-  type:JOI.string().required(),
+  type:JOI.string().valid("All","Diet Plans","Workout Plans").required(),
   page:JOI.number().required(),
   pageSize:JOI.number().required()
 });
