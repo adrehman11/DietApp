@@ -827,46 +827,61 @@ const getCounts = async (coach) => {
 };
 
 const getCountsTeamLeadCount = async () => {
-    const statuses = [
-        "Assigned Clients",
-        "UnAssigned Clients",
-    ];
+    const statuses =[
+        "All",
+        "Diet Plans",
+        "Workout Plans",
+
+    ]
+   
 
     let counts = {};
 
     for (let status of statuses) {
-        let workoutQuery = {};
-        let dietQuery = {};
-        if (status == "Assigned Clients") {
-            workoutQuery = {
-                workoutCoach_id: { $ne: null }
+        let AssignedClients = {};
+        let UnAssignedClients = {};
+        if (status == "All") {
+            AssignedClients = {
+                $or: [{ coach_id: { $ne: null } }, { workoutCoach_id: { $ne: null } }]
             };
 
-            dietQuery = {
-                coach_id: { $ne: null }
+            UnAssignedClients = {
+                $or: [{ coach_id: null }, { workoutCoach_id: null }]
             };
         }
-        else if (status == "UnAssigned Clients") {
-            workoutQuery = {
-                workoutCoach_id: null
+        else if (status == "Diet Plans") {
+            AssignedClients = {
+                coach_id: { $ne: null } 
             };
 
-            dietQuery = {
+            UnAssignedClients = {
                 coach_id: null
+            };
+        }
+        else if (status == "Workout Plans")
+        {
+            AssignedClients = {
+                workoutCoach_id: { $ne: null } 
+            };
+
+            UnAssignedClients = {
+                workoutCoach_id: null
             };
         }
 
 
 
         // Count separately for workout and diet plans
-        const workoutCount = await User.countDocuments(workoutQuery);
-        const dietCount = await User.countDocuments(dietQuery);
+        const AssignedClientsData = await User.countDocuments(AssignedClients);
+        const UnAssignedClientsData = await User.countDocuments(UnAssignedClients);
 
         // Store the separate counts and the total combined count
         counts[status] = {
-            "Assigned Clients": workoutCount,
-            "UnAssigned Clients": dietCount,
-            "All": workoutCount + dietCount // Ensuring users with both statuses are counted twice
+            
+                AssignedClients:AssignedClientsData,
+                UnAssignedClients:UnAssignedClientsData,
+                Total:AssignedClientsData+UnAssignedClientsData
+           
         };
     }
 
