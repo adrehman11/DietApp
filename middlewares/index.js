@@ -636,6 +636,20 @@ exports.getAllCoach = (req, res, next) => {
     next();
   }
 };
+const getAllWorkoutExercisesScehma = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  search: JOI.string().allow(),
+});
+
+exports.getAllWorkoutExercises = (req, res, next) => {
+  const result = getAllWorkoutExercisesScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
 
 
 
