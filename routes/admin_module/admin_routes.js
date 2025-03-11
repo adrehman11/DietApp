@@ -23,7 +23,8 @@ const {
   getCoachAdminData,
   getAllCoach,
   login,
-  getAllWorkoutExercises
+  getAllWorkoutExercises,
+  getCustomerSupportByID
   } = require("../../middlewares/index");
 
   Router.post('/login',login,AdminControllerRoles.login);
@@ -49,6 +50,8 @@ const {
 Router.post('/getAllCoach',authorization([Roles.admin]),getAllCoach,AdminControllerListing.getAllCoach);
 Router.post('/getCoachAdminData',authorization([Roles.admin]),getCoachAdminData,AdminControllerListing.getCoachAdminData);
 Router.post('/getAllTeamLeads',authorization([Roles.admin]),getAllCoach,AdminControllerListing.getAllTeamleads);
+Router.post('/GetAllCustomerSupport',authorization([Roles.admin]),getAllCoach,AdminControllerListing.getAllCustomerSupport);
+Router.post('/getCustomerSupportByID',authorization([Roles.admin]),getCustomerSupportByID,AdminControllerListing.getCustomerSupportByID);
 
 
   

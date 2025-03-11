@@ -636,6 +636,7 @@ exports.getAllCoach = (req, res, next) => {
     next();
   }
 };
+
 const getAllWorkoutExercisesScehma = JOI.object().keys({
   page: JOI.number().required(),
   pageSize: JOI.number().required(),
@@ -842,3 +843,17 @@ exports.getCoachAdminData = (req, res, next) => {
   }
 };
 
+const getCustomerSupportByIDScehma = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  _id:JOI.string().required()
+});
+
+exports.getCustomerSupportByID = (req, res, next) => {
+  const result = getCustomerSupportByIDScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};

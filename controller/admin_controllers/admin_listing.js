@@ -1,6 +1,7 @@
 const { FoodItem } = require("../../models/foodItem_model");
 const { User } = require("../../models/client_model");
 const { Coach } = require("../../models/coach_model");
+const { SupportTicket } = require("../../models/supportTicket_model");
 
 const { Form } = require("../../models/form_model");
 const { DietPlan } = require("../../models/dietPlan_model");
@@ -88,6 +89,50 @@ exports.getAllTeamleads = async function (req, res) {
       .skip(skip)
       .limit(pageSize)
       .select("full_name bio status email U_ID");
+
+    return res.status(200).json(data);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+exports.getAllCustomerSupport = async function (req, res) {
+  try {
+    const page = req.body.page || 1;
+    const pageSize = req.body.pageSize || 10;
+    const skip = (page - 1) * pageSize;
+
+    const searchFilter = req.body.search != ""
+      ? {
+          role: Roles.customerSupport,
+          full_name: { $regex: req.body.search, $options: "i" },
+        }
+      : { role: Roles.customerSupport };
+    let data = await Coach.find(searchFilter)
+      .skip(skip)
+      .limit(pageSize)
+      .select("full_name bio status email U_ID");
+
+    return res.status(200).json(data);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+exports.getCustomerSupportByID = async function (req, res) {
+  try {
+    const page = req.body.page || 1;
+    const pageSize = req.body.pageSize || 10;
+    const skip = (page - 1) * pageSize;
+
+
+    let data = await SupportTicket.find() .populate({ 
+      path: "client_id", 
+      select: "full_name image phone" // Specify the fields you want
+    })
+      .skip(skip)
+      .limit(pageSize)
+      
 
     return res.status(200).json(data);
   } catch (err) {
