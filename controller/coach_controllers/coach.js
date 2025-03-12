@@ -54,6 +54,20 @@ exports.editProfile = async function (req,res) {
     }
 }
 
+exports.getProfileData = async function (req,res) {
+    try {
+        let coach = req.user;
+    
+          let data =await Coach.findOne({ _id: coach._id }).select("full_name bio status image email role U_ID")
+          res.status(200).json(data);
+        
+    }
+    catch(err)
+    {
+        res.status(500).json({ msg: err.message });
+    }
+}
+
 exports.assignCoach = async function (req, res) {
     try {
         let coach = req.user;
