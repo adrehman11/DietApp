@@ -39,7 +39,19 @@ exports.login = async function (req, res) {
 
 }
 exports.editProfile = async function (req,res) {
-    
+    try {
+        let coach = req.user;
+        if ( req.file.location) {
+            req.body.image =  req.file.location
+          }
+          await Coach.updateOne({ _id: coach._id }, { $set: { ...req.body } });
+          res.status(200).json({ msg: "Profile updated" });
+        
+    }
+    catch(err)
+    {
+        res.status(500).json({ msg: err.message });
+    }
 }
 
 exports.assignCoach = async function (req, res) {

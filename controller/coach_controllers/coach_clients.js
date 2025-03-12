@@ -110,7 +110,7 @@ exports.getClientsByFilter = async function (req, res) {
         const page = req.body.page || 1;
         const pageSize = req.body.pageSize || 10;
         const skip = (page - 1) * pageSize;
-
+        
 
         if (req.body.type === "All") {
             if(req.body.filter === "")
@@ -122,6 +122,9 @@ exports.getClientsByFilter = async function (req, res) {
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = {};
+                }
+                if (req.body.search) {
+                    query.full_name = { $regex: req.body.search, $options: "i" };
                 }
                 // Fetch users with pagination
                 const users = await User.find(query)

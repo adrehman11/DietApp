@@ -482,7 +482,8 @@ const getAllClientsByFilterSchema = JOI.object().keys({
   page: JOI.number().required(),
   pageSize: JOI.number().required(),
   type:JOI.string().required(),
-  filter:JOI.string().valid("",Plan_Status.AllReady,Plan_Status.UpdateNeeded,Plan_Status.FirstPlanNeeded).allow("")
+  filter:JOI.string().valid("",Plan_Status.AllReady,Plan_Status.UpdateNeeded,Plan_Status.FirstPlanNeeded).allow(""),
+  search:JOI.string().optional().allow("")
 });
 
 exports.getAllClientsByFilter = (req, res, next) => {
@@ -857,3 +858,19 @@ exports.getCustomerSupportByID = (req, res, next) => {
     next();
   }
 };
+
+const editProfileScehma = JOI.object().keys({
+  full_name : JOI.string().required(),
+  bio: JOI.string().required(),
+  status:JOI.string().required()
+});
+
+exports.editProfile = (req, res, next) => {
+  const result = editProfileScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
