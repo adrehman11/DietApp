@@ -159,14 +159,14 @@ exports.GetChatByTicketId = async function (req, res) {
     const forms = await Form.find({ client_id:clientData._id}).exec();
 
     // Create a map of form data by client_id for quick access
-    const formsMap = forms.reduce((acc, form) => {
-      acc[form.client_id.toString()] = form;
-      return acc;
-    }, {});
+    // const formsMap = forms.reduce((acc, form) => {
+    //   acc[form.client_id.toString()] = form;
+    //   return acc;
+    // }, {});
 
    let responseData = {
     ...clientData,
-    formsMap
+    forms
    }
     return res.status(200).json({data,responseData});
   } catch (err) {
