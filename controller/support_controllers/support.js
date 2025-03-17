@@ -1,6 +1,7 @@
 const { SupportTicket } = require("../../models/supportTicket_model");
 const { SupportTicketChat } = require("../../models/supportTicketChat_model");
 const { User } = require("../../models/client_model");
+const { Form } = require("../../models/form_model");
 const { Coach } = require("../../models/coach_model");
 const { Roles } = require("../../Helpers/constants");
 const JWT = require("jsonwebtoken");
@@ -40,7 +41,7 @@ exports.login = async function (req, res) {
     console.log(err);
     res.status(500).json(err);
   }
-}
+};
 exports.GetAllTickets = async function (req, res) {
   try {
     let { type, page = 1, pageSize = 10 } = req.body; // Default page = 1, pageSize = 10
@@ -75,14 +76,12 @@ exports.GetAllTickets = async function (req, res) {
       totalPages: Math.ceil(totalTickets / pageSize),
       data,
     });
-  } catch (err)
-   {
+  } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Internal Server Error", error: err });
   }
-}
-exports.UpdateTicketStatus = async function (req, res) 
-{
+};
+exports.UpdateTicketStatus = async function (req, res) {
   try {
     const { _id, status } = req.body;
 
@@ -118,35 +117,62 @@ exports.UpdateTicketStatus = async function (req, res)
     res.status(500).json({ message: "Internal Server Error", error: err });
   }
 };
-exports.chatOnTicket = async function (req, res) 
-{
+exports.chatOnTicket = async function (req, res) {
   try {
-   req.body.Support_id = req.user._id
-    await SupportTicketChat.create(req.body)
+    req.body.Support_id = req.user._id;
+    await SupportTicketChat.create(req.body);
     return res.status(200).json({ message: "Response submitted" });
-
   } catch (err) {
-    return res.status(500).json({ message: "Internal Server Error", error: err });
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: err });
   }
 };
-exports.GetChatByTicketId = async function (req, res) 
-{
+exports.GetChatByTicketId = async function (req, res) {
   try {
-   let {  page = 1, pageSize = 10 } = req.body;
+    let { page = 1, pageSize = 10 } = req.body;
     page = parseInt(page);
     pageSize = parseInt(pageSize);
-   let data = await SupportTicketChat.find({supportTicket_id:req.body.ticket_id})
-   .populate("client_id", "full_name image") // Selective population
-   .populate("Support_id", "full_name image") // Selective population
-   .skip((page - 1) * pageSize) // Skipping previous pages
-   .limit(pageSize) // Limiting results per page
-   .sort({ createdAt: -1 });
-    return res.status(200).json(data);
+    let data = await SupportTicketChat.find({
+      supportTicket_id: req.body.ticket_id,
+    })
+      .populate("client_id", "full_name image") // Selective population
+      .populate("Support_id", "full_name image") // Selective population
+      .skip((page - 1) * pageSize) // Skipping previous pages
+      .limit(pageSize) // Limiting results per page
+      .sort({ createdAt: -1 });
 
+    let clientData = await User.findOne({ _id: req.body.client_id })
+      .select(
+        "full_name diet_plan_status workout_plan_status subsctiption_status"
+      )
+      .populate({ path: "coach_id", select: "_id full_name email role U_ID" })
+      .populate({
+        path: "workoutCoach_id",
+        select: "_id full_name email role U_ID",
+      })
+      // .exec()
+      .lean()
+    
+
+    // Fetch all forms in a single query
+    const forms = await Form.find({ client_id:clientData._id}).exec();
+
+    // Create a map of form data by client_id for quick access
+    const formsMap = forms.reduce((acc, form) => {
+      acc[form.client_id.toString()] = form;
+      return acc;
+    }, {});
+
+   let responseData = {
+    ...clientData,
+    formsMap
+   }
+    return res.status(200).json({data,responseData});
   } catch (err) {
-    return res.status(500).json({ message: "Internal Server Error", error: err });
+    console.log(err)
+    return res
+      .status(500)
+      .json({ message: "Internal Server Error", error: err });
   }
 };
-
-
-

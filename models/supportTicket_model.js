@@ -5,6 +5,7 @@ var SupportTicketSchema = new mongoose.Schema({
     name: { type:String , required:true },
     email: { type:String , required:true},
     department:{type:String , required:true},
+    description:{type:String , required:true},
     image:{type:String },
     client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
     status: { type:String , required:true  },

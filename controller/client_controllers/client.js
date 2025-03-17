@@ -483,7 +483,7 @@ exports.GetChatByTicketId = async function (req, res)
    .populate("Support_id", "full_name image") // Selective population
    .skip((page - 1) * pageSize) // Skipping previous pages
    .limit(pageSize) // Limiting results per page
-   .sort({ createdAt: -1 });
+   .sort({ createdAt: 1 });
     return res.status(200).json(data);
 
   } catch (err) {

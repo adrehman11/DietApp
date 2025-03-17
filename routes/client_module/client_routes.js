@@ -44,6 +44,10 @@ const {
   Router.get("/getSupportTickets",authMiddleware,UserController.getAllSupportTicket )
   Router.post('/chatOnTicket',authMiddleware,chatOnTicket,UserController.chatOnTicket);
   Router.post('/getChatByTicketId',authMiddleware,getSupportTicketChatById,UserController.GetChatByTicketId);
+  
+
+  //stripe routes
+  // Router.post('/create-checkout-session',authMiddleware,UserController.GetChatByTicketId);
 
 
   

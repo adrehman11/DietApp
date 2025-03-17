@@ -659,6 +659,7 @@ const generateSupportTicketScehma = JOI.object().keys({
   name: JOI.string().required(),
   email:  JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
   department: JOI.string().required(),
+  description:JOI.string().optional(),
 });
 
 exports.generateSupportTicket = (req, res, next) => {
@@ -734,6 +735,7 @@ const getSupportTicketChatByIdSchema = JOI.object().keys({
   page: JOI.number().required(),
   pageSize: JOI.number().required(),
   ticket_id:JOI.string().required(),
+  client_id:JOI.string().required(),
 });
 
 exports.getSupportTicketChatById = (req, res, next) => {
