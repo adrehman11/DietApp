@@ -17,6 +17,28 @@ exports.addWorkoutExercise = async function (req, res) {
         res.status(500).json(err)
     }
 }
+exports.editWorkoutExercise = async function (req, res) {
+  try {
+      if ( req.file.location) {
+          req.body.image =  req.file.location
+        }
+        const updatedExercise = await WorkoutExercise.findOneAndUpdate(
+          { _id: req.body.workoutId }, // Find by ID or another filter
+          req.body, // Update with request body
+          { new: true, runValidators: true } // Options: return updated doc, apply validators
+        );
+        
+        if (!updatedExercise) {
+          return res.status(400).json({ message: "Workout exercise not found" });
+        }
+        
+      return res.status(200).json({ message:"Workout exercise Added",updatedExercise });
+  }
+  catch (err) {
+      console.log(err)
+      res.status(500).json(err)
+  }
+}
 exports.getAllWorkoutExercises = async function (req, res) {
     try {
       const page = req.body.page || 1;

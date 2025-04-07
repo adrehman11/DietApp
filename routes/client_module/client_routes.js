@@ -4,7 +4,6 @@ const UserController = require("../../controller/client_controllers/client");
 const UserControllerPayment = require("../../controller/client_controllers/payment");
 const upload = require("../../utility/aws")
 const authMiddleware = require("../../middlewares/clientauth");
-
 const {
     login,
     signup,
@@ -48,9 +47,9 @@ const {
   
 
   //stripe routes
-  // Router.post('/create-checkout-session',UserControllerPayment.checkout_session);
-  // Router.post('/success',UserControllerPayment.success_session);
-  // Router.post('/create-checkout-session',UserControllerPayment.checkout_session);
+  Router.post('/create-checkout-session',authMiddleware,UserControllerPayment.checkout_session);
+  Router.get('/success',UserControllerPayment.success_session);
+  Router.post('/create-checkout-session',UserControllerPayment.checkout_session);
 
 
   

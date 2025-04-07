@@ -356,6 +356,32 @@ exports.addWorkoutExercise = (req, res, next) => {
   }
 };
 
+const editWorkoutExerciseSchema = JOI.object().keys({
+  workoutId:JOI.string().required(),
+  exercise_name: JOI.string().required(),
+  category: JOI.string().required(),
+  target_muscle: JOI.string().required(),
+  equipment: JOI.string().required(),
+  exercise_type: JOI.string().required(),
+  video_url: JOI.string().required(),
+  description: JOI.string().required(),
+  kg: JOI.number().required(),
+  RepsPerSet: JOI.number().required(),
+  Tempo: JOI.number().required(),
+  RestTime: JOI.number().required(),
+})
+
+
+
+exports.editWorkoutExercise = (req, res, next) => {
+  const result = editWorkoutExerciseSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
 
 const AllWorkoutExerciseSchema = JOI.object().keys({
   page: JOI.number().required(),

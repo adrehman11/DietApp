@@ -9,6 +9,7 @@ const { ScheduleCheckInTrack } = require("../../models/scheduleCheckinTrack_mode
 const { WorkoutPlanTrack } = require("../../models/workoutTrack_model")
 const { SupportTicket } = require("../../models/supportTicket_model")
 const { SupportTicketChat } = require("../../models/supportTicketChat_model")
+const { Subscription } = require("../../models/subscription_model")
 const jwt = require("jsonwebtoken")
 const { Roles, Form_Types, Form_Status, Plan_Status, Subscription_Status, DietPlanStatus, FoodCategory, WorkoutPlanStatus } = require("../../Helpers/constants")
 const { otp_code, hash, calculateTotalNutrientsForPlan,generateTicketId } = require("../../Helpers/helperFunction")
@@ -81,7 +82,8 @@ exports.login = async function (req, res) {
     //login work
     await User.updateOne({ _id: data._id }, { isLogin: true })
     let formdata = await Form.findOne({client_id:data._id})
-    return res.status(200).json({ token: token, isNewUser: data.isNewUser, userData: updatedData,formdata:formdata });
+    let subscriptionData = await Subscription.findOne({user_id:data._id}).select("paymentStatus subscriptionName currentPeriodStart currentPeriodEnd")
+    return res.status(200).json({ token: token, isNewUser: data.isNewUser, userData: updatedData,formdata:formdata,subscriptionData:subscriptionData });
   }
   catch (err) {
     console.log(err)

@@ -31,7 +31,7 @@ exports.getAllFoodItems = async function (req, res) {
             : {};
 
         let query = FoodItem.find(searchFilter);
-
+        let totaldocuments = await  FoodItem.countDocuments(searchFilter);
         // Apply pagination only if search is NOT provided
         if (!req.body.search) {
             const skip = (page - 1) * pageSize;
@@ -39,7 +39,9 @@ exports.getAllFoodItems = async function (req, res) {
         }
 
         const data = await query;
-        return res.status(200).json(data);
+        
+        
+        return res.status(200).json({data :data ,totaldocuments:totaldocuments,page:page,pageSize:pageSize});
     } catch (err) {
         console.log(err);
         res.status(500).json(err);
@@ -89,7 +91,8 @@ exports.getAllFoodRecipe = async function (req, res) {
             );
             return { ...recipe, totalRecipeNutrients: total };
           });
-        return res.status(200).json(result);
+          let totaldocuments = await  FoodRecipe.countDocuments();
+        return res.status(200).json({result:result,totaldocuments:totaldocuments,page:page,pageSize:pageSize});
     }
     catch (err) {
         console.log(err)
@@ -120,7 +123,9 @@ exports.getAllSupplement = async function (req, res) {
         const pageSize = req.body.pageSize || 10;
         const skip = (page - 1) * pageSize;
         let data = await Supplement.find().skip(skip).limit(pageSize)
-        return res.status(200).json(data);
+        let totaldocuments = await  Supplement.countDocuments();
+
+        return res.status(200).json({data:data,totaldocuments:totaldocuments,page:page,pageSize:pageSize});
     }
     catch (err) {
         console.log(err)
