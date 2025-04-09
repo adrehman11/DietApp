@@ -40,7 +40,7 @@ exports.getCoachAdminData = async function (req, res) {
       $or: [{ coach_id: req.body._id }, { workoutCoach_id: req.body._id  }],
     })
       .select(
-        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+        "image full_name diet_plan_status workout_plan_status subscription_status"
       )
       .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
       .populate({

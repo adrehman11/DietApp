@@ -19,7 +19,7 @@ var UserSchema = new mongoose.Schema({
     workoutCoach_id:{ type: mongoose.Schema.Types.ObjectId, ref: 'Coach' },
     diet_plan_status: {type: String,default :null},
     workout_plan_status: {type: String,default :Plan_Status.FirstPlanNeeded},
-    subsctiption_status: {type: String,default :Subscription_Status.NotStarted},
+    subscription_status: {type: String,default :Subscription_Status.NotStarted},
 },
 { timestamps: true });
 

@@ -134,7 +134,7 @@ async function subscribSuccess(session, subscription) {
         currentPeriodStart: currentPeriodStart,
         subscriptionName:subscriptionName
       });
-      await User.updateOne({_id:userId},{$set:{subsctiption_status:Subscription_Status.Active}})
+      await User.updateOne({_id:userId},{$set:{subscription_status:Subscription_Status.Active}})
     }
   } catch (error) {
     throw error;

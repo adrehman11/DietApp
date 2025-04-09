@@ -45,7 +45,7 @@ exports.getAllscheduleCheckIn = async function (req, res) {
         }
         let data = await ScheduleCheckIn.find(query).populate({
             path: 'client_id',
-            select: '_id full_name email role diet_plan_status workout_plan_status subsctiption_status',
+            select: '_id full_name email role diet_plan_status workout_plan_status subscription_status',
           })
         res.status(200).json(data)
     }
@@ -59,7 +59,7 @@ exports.getScheduleCheckData = async function (req, res) {
         let coach = req.user
         // let data = await ScheduleCheckIn.find({coach_id:coach._id,status:"Completed"}).populate({
         //     path: 'client_id',
-        //     select: '_id full_name email role diet_plan_status workout_plan_status subsctiption_status',
+        //     select: '_id full_name email role diet_plan_status workout_plan_status subscription_status',
         //   })
         let matchQuery = {}
         if (coach.role == Roles.coach) {

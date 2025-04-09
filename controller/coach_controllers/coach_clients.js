@@ -70,7 +70,7 @@ exports.getTeamClientsByFilter = async function (req, res) {
 
         const users = await User.find(query)
             .select(
-                "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                "image full_name diet_plan_status workout_plan_status subscription_status"
             )
             .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
             .populate({
@@ -129,7 +129,7 @@ exports.getClientsByFilter = async function (req, res) {
                 // Fetch users with pagination
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
                     .populate({
@@ -176,7 +176,7 @@ exports.getClientsByFilter = async function (req, res) {
                 // Fetch users with pagination
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status coach_id workoutCoach_id"
+                        "image full_name diet_plan_status workout_plan_status subscription_status coach_id workoutCoach_id"
                     )
                     .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
                     .populate({
@@ -226,7 +226,7 @@ exports.getClientsByFilter = async function (req, res) {
                 // Fetch users with pagination
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
                     .populate({
@@ -280,7 +280,7 @@ exports.getClientsByFilter = async function (req, res) {
                 // Fetch users with pagination
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
                     .populate({
@@ -334,7 +334,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
@@ -382,7 +382,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
@@ -429,7 +429,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
@@ -476,7 +476,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
@@ -535,7 +535,7 @@ exports.getClientsByFilter = async function (req, res) {
                 // query = { diet_plan_status: { $in: statusesToMatch } };
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
@@ -583,7 +583,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
@@ -632,7 +632,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
@@ -681,7 +681,7 @@ exports.getClientsByFilter = async function (req, res) {
                 }
                 const users = await User.find(query)
                     .select(
-                        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
@@ -735,7 +735,7 @@ exports.getClientById = async function (req, res) {
 
         const users = await User.findOne({ _id: req.body.client_id })
             .select(
-                "image full_name diet_plan_status workout_plan_status subsctiption_status"
+                "image full_name diet_plan_status workout_plan_status subscription_status"
             )
             .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
             .populate({

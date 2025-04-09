@@ -144,7 +144,7 @@ exports.GetChatByTicketId = async function (req, res) {
 
     let clientData = await User.findOne({ _id: req.body.client_id })
       .select(
-        "image full_name diet_plan_status workout_plan_status subsctiption_status"
+        "image full_name diet_plan_status workout_plan_status subscription_status"
       )
       .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
       .populate({

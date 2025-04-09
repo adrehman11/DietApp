@@ -175,7 +175,7 @@ exports.getAllDietPlans = async function (req, res) {
       .populate({
         path: "client_id",
         select:
-          "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+          "_id full_name email role diet_plan_status workout_plan_status subscription_status",
       })
       .populate({
         path: "coach_id",
@@ -269,7 +269,7 @@ exports.getDietPlanById = async function (req, res) {
       .populate({
         path: "client_id",
         select:
-          "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+          "_id full_name email role diet_plan_status workout_plan_status subscription_status",
       })
       .populate({
         path: "coach_id",
@@ -419,7 +419,7 @@ exports.getAllWorkoutplan = async function (req, res) {
       .populate({
         path: "client_id",
         select:
-          "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+          "_id full_name email role diet_plan_status workout_plan_status subscription_status",
       })
       .populate({
         path: "coach_id",
@@ -439,7 +439,7 @@ exports.getWorkoutplanById = async function (req, res) {
       .populate({
         path: "client_id",
         select:
-          "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+          "_id full_name email role diet_plan_status workout_plan_status subscription_status",
       })
       .populate({
         path: "coach_id",
@@ -485,7 +485,7 @@ exports.getAllPlansByCoach = async function (req, res) {
           .populate({
             path: "client_id",
             select:
-              "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+              "_id full_name email role diet_plan_status workout_plan_status subscription_status",
           })
           .populate({
             path: "coach_id",
@@ -497,7 +497,7 @@ exports.getAllPlansByCoach = async function (req, res) {
           .populate({
             path: "client_id",
             select:
-              "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+              "_id full_name email role diet_plan_status workout_plan_status subscription_status",
           })
           .populate({
             path: "coach_id",
@@ -553,7 +553,7 @@ exports.getAllPlansByCoach = async function (req, res) {
           .populate({
             path: "client_id",
             select:
-              "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+              "_id full_name email role diet_plan_status workout_plan_status subscription_status",
           })
           .populate({
             path: "coach_id",
@@ -605,7 +605,7 @@ exports.getAllPlansByCoach = async function (req, res) {
           .populate({
             path: "client_id",
             select:
-              "_id full_name email role diet_plan_status workout_plan_status subsctiption_status",
+              "_id full_name email role diet_plan_status workout_plan_status subscription_status",
           })
           .populate({
             path: "coach_id",

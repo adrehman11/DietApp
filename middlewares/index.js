@@ -1,5 +1,5 @@
 const JOI = require("@hapi/joi");
-const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType, Roles,Plan_Status } = require("../Helpers/constants")
+const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType, Roles,Plan_Status,Subscription_Status } = require("../Helpers/constants")
 
 const loginSchema = JOI.object().keys({
   email: JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
@@ -902,3 +902,33 @@ exports.editProfile = (req, res, next) => {
   }
 };
 
+const getStaffClientsByFilterSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  filter:JOI.string().valid("All Plans","Active Plans" ,"Freezed Plans" ,"Expired Plans"),
+  search:JOI.string().optional().allow("")
+});
+
+exports.getStaffClientsByFilter = (req, res, next) => {
+  const result = getStaffClientsByFilterSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const changeSubscriptionStatusByClientIdScehma = JOI.object().keys({
+  client_id: JOI.string().required(),
+  subscriptionId: JOI.string().required(),
+  status: JOI.string().required().valid("Active","Freezed"),
+  freezDuaration: JOI.number().required()
+});
+
+exports.changeSubscriptionStatusByClientId = (req, res, next) => {
+  const result = changeSubscriptionStatusByClientIdScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};

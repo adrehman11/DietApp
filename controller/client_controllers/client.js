@@ -150,7 +150,7 @@ exports.firstTimeForm = async (req, res) => {
 
     await Form.create(req.body)
     //update user 
-    await User.updateOne({ _id: client._id }, { subsctiption_status: Subscription_Status.NotStarted, isNewUser: false, diet_plan_status: Plan_Status.FirstPlanNeeded, workout_plan_status: Plan_Status.FirstPlanNeeded })
+    await User.updateOne({ _id: client._id }, { subscription_status: Subscription_Status.NotStarted, isNewUser: false, diet_plan_status: Plan_Status.FirstPlanNeeded, workout_plan_status: Plan_Status.FirstPlanNeeded })
 
 
     return res.status(200).json({ msg: "First Time Form submited" });
@@ -171,7 +171,7 @@ exports.getActiveDietPlan = async (req, res) => {
       }
     }).populate({
       path: 'client_id',
-      select: '_id full_name email role diet_plan_status workout_plan_status subsctiption_status',
+      select: '_id full_name email role diet_plan_status workout_plan_status subscription_status',
     }).populate({
       path: 'coach_id',
       select: '_id full_name email role U_ID',
@@ -284,7 +284,7 @@ exports.getActiveWorkoutPlan = async (req, res) => {
     let client = req.user
     let data = await WorkoutPlan.findOne({ client_id: client.id, status: WorkoutPlanStatus.Active }).populate({
       path: 'client_id',
-      select: '_id full_name email role diet_plan_status workout_plan_status subsctiption_status',
+      select: '_id full_name email role diet_plan_status workout_plan_status subscription_status',
     }).populate({
       path: 'coach_id',
       select: '_id full_name email role U_ID',
