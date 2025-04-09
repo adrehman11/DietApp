@@ -42,7 +42,7 @@ exports.login = async function (req, res) {
 
 exports.AddRoles = async function (req, res) {
     try {
-        if ( req.file.location) {
+        if ( req.file && req.file.location) {
             req.body.image =  req.file.location
           }
           req.body.passwordHash  = await hash(req.body.password);

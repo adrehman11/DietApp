@@ -41,7 +41,7 @@ exports.login = async function (req, res) {
 exports.editProfile = async function (req,res) {
     try {
         let coach = req.user;
-        if ( req.file.location) {
+        if ( req.file &&  req.file.location) {
             req.body.image =  req.file.location
           }
           await Coach.updateOne({ _id: coach._id }, { $set: { ...req.body } });

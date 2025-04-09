@@ -6,7 +6,7 @@ const mongoose = require('mongoose');
 
 exports.addWorkoutExercise = async function (req, res) {
     try {
-        if ( req.file.location) {
+        if (req.file &&  req.file.location) {
             req.body.image =  req.file.location
           }
        await WorkoutExercise.create(req.body)        
@@ -19,9 +19,10 @@ exports.addWorkoutExercise = async function (req, res) {
 }
 exports.editWorkoutExercise = async function (req, res) {
   try {
-      if ( req.file.location) {
+      if ( req.file &&  req.file.location) {
           req.body.image =  req.file.location
         }
+
         const updatedExercise = await WorkoutExercise.findOneAndUpdate(
           { _id: req.body.workoutId }, // Find by ID or another filter
           req.body, // Update with request body

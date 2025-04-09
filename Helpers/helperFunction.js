@@ -2,6 +2,8 @@ const bcrypt = require("bcryptjs");
 const crypto = require("crypto");
 const { Subscription } = require("../models/subscription_model");
 const { User } = require("../models/client_model");
+const {Plan_Status,Subscription_Status} = require("../Helpers/constants")
+
 
 function otp_code() {
   return new Promise(async (resolve) => {
@@ -132,6 +134,7 @@ async function subscribSuccess(session, subscription) {
         currentPeriodStart: currentPeriodStart,
         subscriptionName:subscriptionName
       });
+      await User.updateOne({_id:userId},{$set:{subsctiption_status:Subscription_Status.Active}})
     }
   } catch (error) {
     throw error;

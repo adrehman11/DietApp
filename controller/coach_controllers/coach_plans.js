@@ -179,7 +179,7 @@ exports.getAllDietPlans = async function (req, res) {
       })
       .populate({
         path: "coach_id",
-        select: "_id full_name email role U_ID",
+        select: "_id image full_name email role U_ID",
       })
       .lean();
     const TotalDocuments = await DietPlan.countDocuments(query);
@@ -273,7 +273,7 @@ exports.getDietPlanById = async function (req, res) {
       })
       .populate({
         path: "coach_id",
-        select: "_id full_name email role U_ID",
+        select: "_id image full_name email role U_ID",
       })
       .lean();
     if (!data) {
@@ -423,7 +423,7 @@ exports.getAllWorkoutplan = async function (req, res) {
       })
       .populate({
         path: "coach_id",
-        select: "_id full_name email role U_ID",
+        select: "_id image full_name email role U_ID",
       })
       .lean();
     const TotalDocuments = await WorkoutPlan.countDocuments(query);
@@ -443,7 +443,7 @@ exports.getWorkoutplanById = async function (req, res) {
       })
       .populate({
         path: "coach_id",
-        select: "_id full_name email role U_ID",
+        select: "_id image full_name email role U_ID",
       })
       .lean();
     if (!data) {
@@ -489,7 +489,7 @@ exports.getAllPlansByCoach = async function (req, res) {
           })
           .populate({
             path: "coach_id",
-            select: "_id full_name email role U_ID",
+            select: "_id image full_name email role U_ID",
           })
           .lean(),
 
@@ -501,7 +501,7 @@ exports.getAllPlansByCoach = async function (req, res) {
           })
           .populate({
             path: "coach_id",
-            select: "_id full_name email role U_ID",
+            select: "_id image full_name email role U_ID",
           })
           .lean(),
       ]);
@@ -557,7 +557,7 @@ exports.getAllPlansByCoach = async function (req, res) {
           })
           .populate({
             path: "coach_id",
-            select: "_id full_name email role U_ID",
+            select: "_id image full_name email role U_ID",
           })
           .lean(),
       ]);
@@ -609,7 +609,7 @@ exports.getAllPlansByCoach = async function (req, res) {
           })
           .populate({
             path: "coach_id",
-            select: "_id full_name email role U_ID",
+            select: "_id image full_name email role U_ID",
           })
           .lean(),
       ]);
