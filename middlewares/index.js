@@ -633,9 +633,14 @@ exports.scheduleCheckInTrackWorkout = (req, res, next) => {
 
 
 const assignCoachSchema = JOI.object().keys({
-  type:JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
-  _id:JOI.string().required(),
+  assign:JOI.array().items(
+    JOI.object({
+      type:JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
+      _id:JOI.string().required(),
+    })),
   clientId:JOI.string().required()
+
+ 
 });
 
 exports.assignCoach = (req, res, next) => {
