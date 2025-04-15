@@ -647,3 +647,192 @@ exports.getAllPlansByCoach = async function (req, res) {
     res.status(500).json(err);
   }
 };
+
+
+exports.getAllDietPlansToImport = async function (req, res) {
+  try {
+    let coach = req.user;
+    let page = req.body.page;
+    let pageSize = req.body.limit;
+    const skip = (page - 1) * pageSize;
+    let query = {};
+    let data = await DietPlan.find(query)
+      .skip(skip)
+      .limit(pageSize)
+      .populate({
+        path: "meals.items.referenceId",
+        options: { strictPopulate: false },
+        populate: {
+          path: "ingredients.foodItem", // Field inside FoodRecipe to populate
+          model: "FoodItem", // Explicitly specify the FoodItem model
+          options: { strictPopulate: false },
+        },
+      })
+      // .populate({
+      //   path: "client_id",
+      //   select:
+      //     "_id full_name email role diet_plan_status workout_plan_status subscription_status",
+      // })
+      .populate({
+        path: "coach_id",
+        select: "_id image full_name email role U_ID",
+      })
+      .lean();
+    const TotalDocuments = await DietPlan.countDocuments(query);
+
+    // for (let plan of data) {
+    //   let formData = await Form.findOne({
+    //     client_id: plan.client_id._id,
+    //   }).lean();
+    //   plan.client_id.form = formData || {}; // Attach form data to client
+    // }
+    // let dietPlansWithNutrients = calculateTotalNutrients(data);
+    // dietPlansWithNutrients.forEach((plan) => {
+    //   plan.meals.forEach((meal) => {
+    //     const totalNutrientsMeal = {
+    //       TotalCalories: 0,
+    //       TotalFat: 0,
+    //       TotalProtein: 0,
+    //       TotalCarbohydrates: 0,
+    //     };
+
+    //     meal.items.forEach((item) => {
+    //       if (item.type === FoodCategory.FoodItem) {
+    //         const nutrients = item.referenceId;
+    //         totalNutrientsMeal.TotalCalories +=
+    //           nutrients.calories * item.quantity || 0;
+    //         totalNutrientsMeal.TotalFat += nutrients.fat * item.quantity || 0;
+    //         totalNutrientsMeal.TotalProtein +=
+    //           nutrients.protein * item.quantity || 0;
+    //         totalNutrientsMeal.TotalCarbohydrates +=
+    //           nutrients.carbohydrates * item.quantity || 0;
+    //       } else if (item.type === FoodCategory.Recipe) {
+    //         const totalRecipeNutrients = {
+    //           TotalCalories: 0,
+    //           TotalFat: 0,
+    //           TotalProtein: 0,
+    //           TotalCarbohydrates: 0,
+    //         };
+    //         item.referenceId.ingredients.forEach((ingredient) => {
+    //           const foodItem = ingredient.foodItem;
+
+    //           totalRecipeNutrients.TotalCalories +=
+    //             foodItem.calories * ingredient.quantity * item.quantity || 0;
+    //           totalRecipeNutrients.TotalFat +=
+    //             foodItem.fat * ingredient.quantity * item.quantity || 0;
+    //           totalRecipeNutrients.TotalProtein +=
+    //             foodItem.protein * ingredient.quantity * item.quantity || 0;
+    //           totalRecipeNutrients.TotalCarbohydrates +=
+    //             foodItem.carbohydrates * ingredient.quantity * item.quantity ||
+    //             0;
+    //         });
+    //         item.referenceId.totalRecipeNutrients = totalRecipeNutrients;
+    //         totalNutrientsMeal.TotalCalories +=
+    //           totalRecipeNutrients.TotalCalories;
+    //         totalNutrientsMeal.TotalFat += totalRecipeNutrients.TotalFat;
+    //         totalNutrientsMeal.TotalProtein +=
+    //           totalRecipeNutrients.TotalProtein;
+    //         totalNutrientsMeal.TotalCarbohydrates +=
+    //           totalRecipeNutrients.TotalCarbohydrates;
+    //       }
+    //     });
+
+    //     meal.totalMealNutrients = totalNutrientsMeal;
+    //   });
+    // });
+
+    return res
+      .status(200)
+      .json({ data, TotalDocuments, page, pageSize });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+
+exports.getAllWorkoutPlanToImport  = async function (req, res) {
+  try {
+    let coach = req.user;
+    let page = req.body.page;
+    let pageSize = req.body.limit;
+    const skip = (page - 1) * pageSize;
+    let query = {};
+    let data = await WorkoutPlan.find(query)
+      .skip(skip)
+      .limit(pageSize)
+      // .populate({
+      //   path: "client_id",
+      //   select:
+      //     "_id full_name email role diet_plan_status workout_plan_status subscription_status",
+      // })
+      .populate({
+        path: "coach_id",
+        select: "_id image full_name email role U_ID",
+      })
+      .lean();
+    const TotalDocuments = await WorkoutPlan.countDocuments(query);
+    return res.status(200).json({ data, TotalDocuments, page, pageSize });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+
+exports.importDietPlan = async function (req, res) {
+  try {
+    let coach = req.user;
+    let data = await DietPlan.findOne({ _id: req.body.dietPlanID })
+    if(!data) {
+      throw "No Data found";
+    } 
+    let newDietPlan = {
+      name:data.name,
+      numberOfDays:data.numberOfDays,
+      meals:data.meals,
+      status: DietPlanStatus.Saved,
+      _id: new mongoose.Types.ObjectId(),
+      client_id: req.body.client_id,
+      coach_id: coach._id,
+      coach_notes:data.coach_notes,
+    };
+    await DietPlan.create(newDietPlan);
+
+
+    return res
+      .status(200)
+      .json({ msg: 'Imported successfully' });
+
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
+
+exports.importWorkoutPlan = async function (req, res) {
+  try {
+    let coach = req.user;
+    let data = await WorkoutPlan.findOne({ _id: req.body.workoutPlanID })
+    if(!data) {
+      throw "No Data found";
+    }
+    let newWorkoutPlan = {
+      name:data.name,
+      numberOfweeks:data.numberOfweeks,
+      exercises:data.exercises,
+      status: WorkoutPlanStatus.Saved,
+      _id: new mongoose.Types.ObjectId(),
+      client_id: req.body.client_id,
+      coach_id: coach._id,
+      coach_notes:data.coach_notes,
+    };
+    await WorkoutPlan.create(newWorkoutPlan);
+   
+
+    return res
+      .status(200)
+      .json({ msg: 'Imported successfully' });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};

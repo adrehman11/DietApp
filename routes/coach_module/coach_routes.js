@@ -31,7 +31,10 @@ const {
     deleteDietPlan,
     getTeamLeadClientsByFilter,
     getAllPlansByFilter,
-    editProfile
+    editProfile,
+    importData,
+    importDietPlan,
+    importWorkoutPlan
   } = require("../../middlewares/index");
 
 
@@ -78,6 +81,12 @@ const {
   //plan history
   Router.post('/getAllPlansByFilter',authorization([Roles.coach]),getAllPlansByFilter,Coach_Plans.getAllPlansByCoach);
 
+
+  //import data 
+  Router.post('/getAllDietPlansToImport',authorization([Roles.coach]),importData,Coach_Plans.getAllDietPlansToImport);
+  Router.post('/getAllWorkoutPlansToImport',authorization([Roles.coach]),importData,Coach_Plans.getAllWorkoutPlanToImport);
+  Router.post('/importDietPlan',authorization([Roles.coach]),importDietPlan,Coach_Plans.importDietPlan);
+  Router.post('/importWorkoutPlan',authorization([Roles.coach]),importWorkoutPlan,Coach_Plans.importWorkoutPlan);
 
 
 

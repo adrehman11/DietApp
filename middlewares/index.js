@@ -937,3 +937,50 @@ exports.changeSubscriptionStatusByClientId = (req, res, next) => {
     next();
   }
 };
+
+const importDataSchema = JOI.object().keys({
+  page:JOI.number().required(),
+  pageSize:JOI.number().required()
+});
+
+exports.importData = (req, res, next) => {
+  const result = importDataSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const importDietPlanSchema = JOI.object().keys({
+  dietPlanID:JOI.string().required(),
+  client_id:JOI.string().required(),
+  client_id:JOI.string().required()
+
+});
+
+exports.importDietPlan = (req, res, next) => {
+  const result = importDietPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const importWorkoutPlanSchema = JOI.object().keys({
+  workoutPlanID:JOI.string().required(),
+  client_id:JOI.string().required(),
+  client_id:JOI.string().required()
+
+});
+
+exports.importWorkoutPlan = (req, res, next) => {
+  const result = importWorkoutPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
