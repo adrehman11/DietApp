@@ -15,22 +15,7 @@ const stripe = require("stripe")(process.env.STRIPE_SECRETE_KEY);
 
 exports.checkout_session = async function (req, res) {
   try {
-    // const testClock = await stripe.testHelpers.testClocks.create({
-    //   frozen_time: Math.floor(Date.now() / 1000), // Current time as a Unix timestamp
-    // });
-    // const customer = await stripe.customers.update('cus_S5NavcrOpSch7h', {
-    //   test_clock: 'clock_1RBD3PDFsVLBaSFfayDWx4Mm', // The ID of the test clock created in Step 1
-    // });
 
-    // const subscription = await stripe.subscriptions.create({
-    //   customer: 'cus_S5NavcrOpSch7h',  // Your existing customer ID
-    //   items: [{ price: 'price_ABC123' }],
-    //   test_clock: 'clock_1RBD3PDFsVLBaSFfayDWx4Mm',  // Link the subscription to the test clock
-    //   payment_behavior: 'default_incomplete', // This can be adjusted based on your needs
-    //   expand: ['latest_invoice.payment_intent'],
-    // });
-    // console.log("Test Subscription created",subscription)
-    // lll
     let user = req.user;
     let pakage = req.query.plan;
     let Price_id;
@@ -55,7 +40,7 @@ exports.checkout_session = async function (req, res) {
         userId: user.id, // Attach your user's DB _id
       },
       success_url: `https://dev-api.dietncheat.ca/client/success?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: `https://dev-api.dietncheat.ca/client/cancel.html`,
+      cancel_url: `https://dev-buy.dietncheat.ca/`,
     });
     return res.status(200).json({ url: session.url });
   } catch (err) {
@@ -76,7 +61,7 @@ exports.success_session = async function (req, res) {
     );
     await subscribSuccess(session,subscription)
 
-    res.send("Subscribe successfully");
+    res.redirect("https://dev-buy.dietncheat.ca/");
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
@@ -92,7 +77,7 @@ exports.webhook = async function (req, res) {
       event = stripe.webhooks.constructEvent(
         req.body,
         sig,
-        process.env.STRIPE_WEBHOOK_KEY
+        process.env.STRIPE_SECRETE_KEY
       );
     } catch (err) {
       res.status(400).send(`Webhook Error: ${err.message}`);
