@@ -86,17 +86,17 @@ exports.assignCoach = async function (req, res) {
     // Find coach data
     let updateQuery = {};
 
-    for (singleAssing of req.body.assign) {
-      let coachData = await Coach.findOne({ _id: singleAssing._id });
+    for (const singleAssign of req.body.assign) {
+      let coachData = await Coach.findOne({ _id: singleAssign._id });
       if (!coachData) {
         return res.status(400).json({ msg: "No Coach found" });
       }
-      if (singleAssing.type === ScheduleCheckInType.Diet) {
-        updateQuery = { coach_id: singleAssing._id };
-      } else if (singleAssing.type === ScheduleCheckInType.Workout) {
-        updateQuery = { workoutCoach_id: singleAssing._id };
-      }
-      else {
+
+      if (singleAssign.type === ScheduleCheckInType.Diet) {
+        updateQuery.coach_id = singleAssign._id;
+      } else if (singleAssign.type === ScheduleCheckInType.Workout) {
+        updateQuery.workoutCoach_id = singleAssign._id;
+      } else {
         return res.status(400).json({ msg: "Invalid type" });
       }
     }
