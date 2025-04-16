@@ -86,7 +86,6 @@ exports.login = async function (req, res) {
     return res.status(200).json({ token: token, isNewUser: data.isNewUser, userData: updatedData,formdata:formdata,subscriptionData:subscriptionData });
   }
   catch (err) {
-    console.log(err)
     res.status(500).json({ err })
   }
 

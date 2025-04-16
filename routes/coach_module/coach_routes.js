@@ -90,7 +90,7 @@ const {
   Router.post('/importWorkoutPlan',authorization([Roles.coach]),importWorkoutPlan,Coach_Plans.importWorkoutPlan);
 
   //chat module
-  Router.get('/inboxChat',authorization([Roles.coach]),ChatController.getInboxChat);
+  Router.get('/inboxChat',authorization([Roles.coach]),ChatController.getInboxChatRooms);
 
 
 

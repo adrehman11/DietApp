@@ -981,4 +981,20 @@ exports.importWorkoutPlan = (req, res, next) => {
     next();
   }
 };
+const inboxChatByRoomIdSchema = JOI.object().keys({
+  page:JOI.number().required(),
+  pageSize:JOI.number().required(),
+  chatRoomId:JOI.string().required(),
+
+});
+
+exports.inboxChatByRoomId = (req, res, next) => {
+  const result = inboxChatByRoomIdSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
 

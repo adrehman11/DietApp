@@ -19,7 +19,8 @@ const {
     scheduleCheckInTrackWorkout,
     generateSupportTicket,
     chatOnTicket,
-    getSupportTicketChatById
+    getSupportTicketChatById,
+    inboxChatByRoomId,
   } = require("../../middlewares/index");
 
   Router.post('/login',login,UserController.login);
@@ -42,7 +43,8 @@ const {
   Router.post('/scheduleCheckInWorkout',authMiddleware,scheduleCheckInTrackWorkout, UserController.ScheduleCheckInTrackWorkout)
 
   //chat module
-  Router.get('/inboxChat',authMiddleware,ChatController.getInboxChat);
+  Router.get('/inboxChatRooms',authMiddleware,ChatController.getInboxChatRooms);
+  Router.post('/inboxChatByRoomId',authMiddleware,inboxChatByRoomId,ChatController.getInboxChatByRoomId);
   //generate Ticket
   Router.post("/createSupportTicket",authMiddleware,upload.single("image"),generateSupportTicket,UserController.createSupportTicket )
   Router.get("/getSupportTickets",authMiddleware,UserController.getAllSupportTicket )
