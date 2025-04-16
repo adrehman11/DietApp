@@ -5,55 +5,317 @@ const { Roles, Form_Types, Plan_Status } = require("../../Helpers/constants");
 const JWT = require("jsonwebtoken");
 const mongoose = require("mongoose");
 
+exports.getTeamClientsByFilter = async function (req, res) {
+    try {
+        const coach = req.user;
+        const page = req.body.page || 1;
+        const pageSize = req.body.pageSize || 10;
+        const skip = (page - 1) * pageSize;
+        let query = {}
+
+        if (req.body.type === "All") {
+            if (req.body.filter === "") {
+
+                query = {}
+            }
+            else if (req.body.filter === "Assigned Clients") {
+                query = {
+                    $or: [{ coach_id: { $ne: null } }, { workoutCoach_id: { $ne: null } }]
+                }
+            }
+            else if (req.body.filter === "Unassigned Clients") {
+                query = {
+                    $or: [{ coach_id: null }, { workoutCoach_id: null }]
+                }
+
+            }
+
+        }
+        else if (req.body.type == "Workout Plans")
+        {
+            if (req.body.filter === "") {
+
+                query = {}
+            }
+            else if (req.body.filter === "Assigned Clients") {
+                query = {
+                     workoutCoach_id: { $ne: null } 
+                }
+            }
+            else if (req.body.filter === "Unassigned Clients") {
+                query = {
+                    workoutCoach_id: null 
+                }
+
+            }
+        }
+        else if (req.body.type == "Diet Plans")
+        {
+            if (req.body.filter === "") {
+
+                query = {}
+            }
+            else if (req.body.filter === "Assigned Clients") {
+                query = {
+                   coach_id: { $ne: null } 
+                }
+            }
+            else if (req.body.filter === "Unassigned Clients") {
+                query = {
+                   coach_id: null 
+                }
+
+            }
+        }
+
+        const users = await User.find(query)
+            .select(
+                "image full_name diet_plan_status workout_plan_status subscription_status"
+            )
+            .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
+            .populate({
+                path: "workoutCoach_id",
+                select: "_id image full_name email role U_ID",
+            })
+            .limit(pageSize)
+            .skip(skip)
+            .exec(); // Extract user IDs to fetch associated form data
+        const userIds = users.map((user) => user._id);
+
+        // Fetch all forms in a single query
+        const forms = await Form.find({ client_id: { $in: userIds } }).exec();
+
+        // Create a map of form data by client_id for quick access
+        const formsMap = forms.reduce((acc, form) => {
+            acc[form.client_id.toString()] = form;
+            return acc;
+        }, {});
+        const counts = await getCountsTeamLeadCount();
+        const TotalDocuments = await User.countDocuments(query)
+        // Attach the form data to the corresponding user
+        const responseData = users.map((user) => ({
+            ...user.toObject(),
+            formData: formsMap[user._id.toString()] || null,
+        }));
+
+        return res.status(200).json({ responseData, counts, TotalDocuments, page, pageSize });
+    } catch (err) {
+        console.log(err);
+        res.status(500).json(err);
+    }
+};
 exports.getClientsByFilter = async function (req, res) {
     try {
         const coach = req.user;
         const page = req.body.page || 1;
         const pageSize = req.body.pageSize || 10;
         const skip = (page - 1) * pageSize;
+        
 
         if (req.body.type === "All") {
-            let query = {};
-            if (coach.role == Roles.coach) {
-                query = {
-                    $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                };
-            } else if (coach.role == Roles.teamLead) {
-                query = {};
+            if(req.body.filter === "")
+            {
+                let query = {};
+                if (coach.role == Roles.coach) {
+                    query = {
+                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
+                    };
+                } else if (coach.role == Roles.teamLead) {
+                    query = {};
+                }
+                if (req.body.search) {
+                    query.full_name = { $regex: req.body.search, $options: "i" };
+                }
+                // Fetch users with pagination
+                const users = await User.find(query)
+                    .select(
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
+                    )
+                    .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
+                    .populate({
+                        path: "workoutCoach_id",
+                        select: "_id image full_name email role U_ID",
+                    })
+                    .limit(pageSize)
+                    .skip(skip)
+                    .exec();
+                // Extract user IDs to fetch associated form data
+                const userIds = users.map((user) => user._id);
+    
+                // Fetch all forms in a single query
+                const forms = await Form.find({ client_id: { $in: userIds } }).exec();
+    
+                // Create a map of form data by client_id for quick access
+                const formsMap = forms.reduce((acc, form) => {
+                    acc[form.client_id.toString()] = form;
+                    return acc;
+                }, {});
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+                // Attach the form data to the corresponding user
+                const responseData = users.map((user) => ({
+                    ...user.toObject(),
+                    formData: formsMap[user._id.toString()] || null,
+                }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
             }
-            // Fetch users with pagination
-            const users = await User.find(query)
-                .select(
-                    "full_name diet_plan_status workout_plan_status subsctiption_status"
-                )
-                .populate({ path: "coach_id", select: "_id full_name email role U_ID" })
-                .populate({
-                    path: "workoutCoach_id",
-                    select: "_id full_name email role U_ID",
-                })
-                .limit(pageSize)
-                .skip(skip)
-                .exec();
+            else if (req.body.filter === Plan_Status.FirstPlanNeeded)
+            {
+                let query = {};
+                if (coach.role == Roles.coach) {
+                    query = {
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{$or:[{ workout_plan_status: Plan_Status.FirstPlanNeeded},{ diet_plan_status: Plan_Status.FirstPlanNeeded}]}]      
+                    };
+                } else if (coach.role == Roles.teamLead) {
+                    query = {
+                        $or: [{ workout_plan_status: Plan_Status.FirstPlanNeeded},{ diet_plan_status: Plan_Status.FirstPlanNeeded}],
 
-            // Extract user IDs to fetch associated form data
-            const userIds = users.map((user) => user._id);
+                    };
+                }
+                // Fetch users with pagination
+                const users = await User.find(query)
+                    .select(
+                        "image full_name diet_plan_status workout_plan_status subscription_status coach_id workoutCoach_id"
+                    )
+                    .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
+                    .populate({
+                        path: "workoutCoach_id",
+                        select: "_id image full_name email role U_ID",
+                    })
+                    .limit(pageSize)
+                    .skip(skip)
+                    .exec();
+    
+                // Extract user IDs to fetch associated form data
+                const userIds = users.map((user) => user._id);
+    
+                // Fetch all forms in a single query
+                const forms = await Form.find({ client_id: { $in: userIds } }).exec();
+    
+                // Create a map of form data by client_id for quick access
+                const formsMap = forms.reduce((acc, form) => {
+                    acc[form.client_id.toString()] = form;
+                    return acc;
+                }, {});
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
+                // Attach the form data to the corresponding user
+                const responseData = users.map((user) => ({
+                    ...user.toObject(),
+                    formData: formsMap[user._id.toString()] || null,
+                }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-            // Fetch all forms in a single query
-            const forms = await Form.find({ client_id: { $in: userIds } }).exec();
+            }
+            else if (req.body.filter === Plan_Status.UpdateNeeded)
+            {
+                let query = {};
+                if (coach.role == Roles.coach) {
+                    query = {
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{ $or:[{ workout_plan_status: Plan_Status.UpdateNeeded},{ diet_plan_status: Plan_Status.UpdateNeeded}]}]       
+                    };
+                } else if (coach.role == Roles.teamLead) {
+                    query = {
+                        $or: [{ workout_plan_status: Plan_Status.UpdateNeeded},{ diet_plan_status: Plan_Status.UpdateNeeded}],
 
-            // Create a map of form data by client_id for quick access
-            const formsMap = forms.reduce((acc, form) => {
-                acc[form.client_id.toString()] = form;
-                return acc;
-            }, {});
+                    };
+                }
+                // Fetch users with pagination
+                const users = await User.find(query)
+                    .select(
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
+                    )
+                    .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
+                    .populate({
+                        path: "workoutCoach_id",
+                        select: "_id image full_name email role U_ID",
+                    })
+                    .limit(pageSize)
+                    .skip(skip)
+                    .exec();
+    
+                // Extract user IDs to fetch associated form data
+                const userIds = users.map((user) => user._id);
+    
+                // Fetch all forms in a single query
+                const forms = await Form.find({ client_id: { $in: userIds } }).exec();
+    
+                // Create a map of form data by client_id for quick access
+                const formsMap = forms.reduce((acc, form) => {
+                    acc[form.client_id.toString()] = form;
+                    return acc;
+                }, {});
+    
+                // Attach the form data to the corresponding user
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
+                // Attach the form data to the corresponding user
+                const responseData = users.map((user) => ({
+                    ...user.toObject(),
+                    formData: formsMap[user._id.toString()] || null,
+                }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-            // Attach the form data to the corresponding user
-            const responseData = users.map((user) => ({
-                ...user.toObject(),
-                formData: formsMap[user._id.toString()] || null,
-            }));
+            }
+            else if (req.body.filter ===Plan_Status.AllReady)
+            {
+                let query = {};
+                if (coach.role == Roles.coach) {
 
-            return res.status(200).json(responseData);
+                    query = {
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{ $or:[{workout_plan_status: Plan_Status.AllReady},{ diet_plan_status: Plan_Status.AllReady}]}]               
+                    };
+                } else if (coach.role == Roles.teamLead) {
+
+                    query = {
+                        $or: [{ workout_plan_status: Plan_Status.AllReady},{ diet_plan_status: Plan_Status.AllReady}],
+
+                    };
+                }
+                // Fetch users with pagination
+                const users = await User.find(query)
+                    .select(
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
+                    )
+                    .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
+                    .populate({
+                        path: "workoutCoach_id",
+                        select: "_id image full_name email role U_ID",
+                    })
+                    .limit(pageSize)
+                    .skip(skip)
+                    .exec();
+    
+                // Extract user IDs to fetch associated form data
+                const userIds = users.map((user) => user._id);
+    
+                // Fetch all forms in a single query
+                const forms = await Form.find({ client_id: { $in: userIds } }).exec();
+    
+                // Create a map of form data by client_id for quick access
+                const formsMap = forms.reduce((acc, form) => {
+                    acc[form.client_id.toString()] = form;
+                    return acc;
+                }, {});
+    
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
+                // Attach the form data to the corresponding user
+                const responseData = users.map((user) => ({
+                    ...user.toObject(),
+                    formData: formsMap[user._id.toString()] || null,
+                }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
+
+            }
+           
         } else if (req.body.type === "Workout Plans") {
             if (req.body.filter === "") {
                 let query = {};
@@ -65,23 +327,22 @@ exports.getClientsByFilter = async function (req, res) {
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        workout_plan_status: { $in: statusesToMatch },
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{workout_plan_status: { $in: statusesToMatch }}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { workout_plan_status: { $in: statusesToMatch } };
                 }
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .populate({
                         path: "workoutCoach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .limit(pageSize)
                     .skip(skip)
@@ -99,34 +360,37 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
 
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "First Plan Needed") {
+            } else if (req.body.filter === Plan_Status.FirstPlanNeeded) {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        workout_plan_status: Plan_Status.FirstPlanNeeded,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{workout_plan_status: Plan_Status.FirstPlanNeeded}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { workout_plan_status: Plan_Status.FirstPlanNeeded };
                 }
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .populate({
                         path: "workoutCoach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .limit(pageSize)
                     .skip(skip)
@@ -143,35 +407,37 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "Update Needed") {
+            } else if (req.body.filter === Plan_Status.UpdateNeeded) {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        workout_plan_status: Plan_Status.UpdateNeeded,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{workout_plan_status: Plan_Status.UpdateNeeded}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { workout_plan_status: Plan_Status.UpdateNeeded };
                 }
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .populate({
                         path: "workoutCoach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .limit(pageSize)
                     .skip(skip)
@@ -188,35 +454,37 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "All Ready") {
+            } else if (req.body.filter === Plan_Status.AllReady) {
                 let query = {};
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        workout_plan_status: Plan_Status.AllReady,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{workout_plan_status: Plan_Status.AllReady}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { workout_plan_status: Plan_Status.AllReady };
                 }
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .populate({
                         path: "workoutCoach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .limit(pageSize)
                     .skip(skip)
@@ -233,14 +501,17 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-                return res.status(200).json(responseData);
             } else {
                 return res.status(200).json({ msg: "No Filter Selected " });
             }
@@ -255,25 +526,24 @@ exports.getClientsByFilter = async function (req, res) {
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        diet_plan_status: { $in: statusesToMatch },
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{diet_plan_status: { $in: statusesToMatch }}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { diet_plan_status: { $in: statusesToMatch } };
                 }
 
-                query = { diet_plan_status: { $in: statusesToMatch } };
+                // query = { diet_plan_status: { $in: statusesToMatch } };
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .populate({
                         path: "workoutCoach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .limit(pageSize)
                     .skip(skip)
@@ -290,36 +560,38 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "First Plan Needed") {
+            } else if (req.body.filter === Plan_Status.FirstPlanNeeded) {
                 let query = {};
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        diet_plan_status: Plan_Status.FirstPlanNeeded,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{diet_plan_status: Plan_Status.FirstPlanNeeded}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { diet_plan_status: Plan_Status.FirstPlanNeeded };
                 }
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .populate({
                         path: "workoutCoach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .limit(pageSize)
                     .skip(skip)
@@ -337,35 +609,38 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
 
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "Update Needed") {
+            } else if (req.body.filter === Plan_Status.UpdateNeeded) {
                 let query = {};
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        diet_plan_status: Plan_Status.UpdateNeeded,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{diet_plan_status: Plan_Status.UpdateNeeded}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { diet_plan_status: Plan_Status.UpdateNeeded };
                 }
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .populate({
                         path: "workoutCoach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .limit(pageSize)
                     .skip(skip)
@@ -383,35 +658,38 @@ exports.getClientsByFilter = async function (req, res) {
                     return acc;
                 }, {});
 
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-                return res.status(200).json(responseData);
-            } else if (req.body.filter === "All Ready") {
+            } else if (req.body.filter === Plan_Status.AllReady) {
                 let query = {};
 
                 if (coach.role == Roles.coach) {
                     query = {
-                        $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }],
-                        diet_plan_status: Plan_Status.AllReady,
+                        $and:[{  $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }]},{diet_plan_status: Plan_Status.AllReady}]                        
                     };
                 } else if (coach.role == Roles.teamLead) {
                     query = { diet_plan_status: Plan_Status.AllReady };
                 }
                 const users = await User.find(query)
                     .select(
-                        "full_name diet_plan_status workout_plan_status subsctiption_status"
+                        "image full_name diet_plan_status workout_plan_status subscription_status"
                     )
                     .populate({
                         path: "coach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .populate({
                         path: "workoutCoach_id",
-                        select: "_id full_name email role U_ID",
+                        select: "_id image full_name email role U_ID",
                     })
                     .limit(pageSize)
                     .skip(skip)
@@ -428,14 +706,17 @@ exports.getClientsByFilter = async function (req, res) {
                     acc[form.client_id.toString()] = form;
                     return acc;
                 }, {});
-
+                const counts = await getCounts(coach);
+                const TotalDocuments = await User.countDocuments(query)
+    
                 // Attach the form data to the corresponding user
                 const responseData = users.map((user) => ({
                     ...user.toObject(),
                     formData: formsMap[user._id.toString()] || null,
                 }));
+    
+                return res.status(200).json({responseData,counts,TotalDocuments,page,pageSize});
 
-                return res.status(200).json(responseData);
             } else {
                 return res.status(200).json({ msg: "No Filter Selected " });
             }
@@ -454,12 +735,12 @@ exports.getClientById = async function (req, res) {
 
         const users = await User.findOne({ _id: req.body.client_id })
             .select(
-                "full_name diet_plan_status workout_plan_status subsctiption_status"
+                "image full_name diet_plan_status workout_plan_status subscription_status"
             )
-            .populate({ path: "coach_id", select: "_id full_name email role U_ID" })
+            .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
             .populate({
                 path: "workoutCoach_id",
-                select: "_id full_name email role U_ID",
+                select: "_id image full_name email role U_ID",
             })
             .lean();
 
@@ -491,7 +772,7 @@ exports.getAllCoach = async function (req, res) {
             : { role: Roles.coach };
         let data = await Coach.find(searchFilter)
             .skip(skip)
-            .limit(page)
+            .limit(pageSize)
             .select("full_name bio status email U_ID");
 
         return res.status(200).json(data);
@@ -499,4 +780,114 @@ exports.getAllCoach = async function (req, res) {
         console.log(err);
         res.status(500).json(err);
     }
+};
+
+const getCounts = async (coach) => {
+    const statuses = [
+        Plan_Status.FirstPlanNeeded,
+        Plan_Status.UpdateNeeded,
+        Plan_Status.AllReady
+    ];
+
+    let counts = {};
+
+    for (let status of statuses) {
+        let workoutQuery = {};
+        let dietQuery = {};
+
+        if (coach.role === Roles.coach) {
+            workoutQuery = {
+                $and: [
+                    { $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }] },
+                    { workout_plan_status: status }
+                ]
+            };
+
+            dietQuery = {
+                $and: [
+                    { $or: [{ coach_id: coach._id }, { workoutCoach_id: coach._id }] },
+                    { diet_plan_status: status }
+                ]
+            };
+        } else if (coach.role === Roles.teamLead) {
+            workoutQuery = { workout_plan_status: status };
+            dietQuery = { diet_plan_status: status };
+        }
+
+        // Count separately for workout and diet plans
+        const workoutCount = await User.countDocuments(workoutQuery);
+        const dietCount = await User.countDocuments(dietQuery);
+
+        // Store the separate counts and the total combined count
+        counts[status] = {
+            "Workout Plans": workoutCount,
+            "Diet Plans": dietCount,
+            "All": workoutCount + dietCount // Ensuring users with both statuses are counted twice
+        };
+    }
+
+    return counts;
+};
+
+const getCountsTeamLeadCount = async () => {
+    const statuses =[
+        "All",
+        "Diet Plans",
+        "Workout Plans",
+
+    ]
+   
+
+    let counts = {};
+
+    for (let status of statuses) {
+        let AssignedClients = {};
+        let UnAssignedClients = {};
+        if (status == "All") {
+            AssignedClients = {
+                $or: [{ coach_id: { $ne: null } }, { workoutCoach_id: { $ne: null } }]
+            };
+
+            UnAssignedClients = {
+                $or: [{ coach_id: null }, { workoutCoach_id: null }]
+            };
+        }
+        else if (status == "Diet Plans") {
+            AssignedClients = {
+                coach_id: { $ne: null } 
+            };
+
+            UnAssignedClients = {
+                coach_id: null
+            };
+        }
+        else if (status == "Workout Plans")
+        {
+            AssignedClients = {
+                workoutCoach_id: { $ne: null } 
+            };
+
+            UnAssignedClients = {
+                workoutCoach_id: null
+            };
+        }
+
+
+
+        // Count separately for workout and diet plans
+        const AssignedClientsData = await User.countDocuments(AssignedClients);
+        const UnAssignedClientsData = await User.countDocuments(UnAssignedClients);
+
+        // Store the separate counts and the total combined count
+        counts[status] = {
+            
+                AssignedClients:AssignedClientsData,
+                UnAssignedClients:UnAssignedClientsData,
+                Total:AssignedClientsData+UnAssignedClientsData
+           
+        };
+    }
+
+    return counts;
+
 };

@@ -16,7 +16,7 @@ var DietPlanSchema = new mongoose.Schema({
                 {
                     type: { 
                         type: String, 
-                        enum: [FoodCategory.FoodItem, FoodCategory.Recipe],  //FoodCategory.Supplement
+                        enum: [FoodCategory.FoodItem, FoodCategory.Recipe,FoodCategory.Supplement],  //
                         required: true 
                     },
                     referenceId: { type: mongoose.Schema.Types.ObjectId, refPath: 'meals.items.type', required: true },

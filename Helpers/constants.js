@@ -3,7 +3,9 @@ const Roles = {
    client:"Client",
    coach:"Coach",
    admin:"Admin",
-   teamLead:"Teamlead"
+   teamLead:"Teamlead",
+   staff:"Staff",
+   customerSupport :"CustomerSupport"
 }
 
 

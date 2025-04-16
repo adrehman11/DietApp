@@ -1,5 +1,5 @@
 const JOI = require("@hapi/joi");
-const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType } = require("../Helpers/constants")
+const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType, Roles,Plan_Status,Subscription_Status } = require("../Helpers/constants")
 
 const loginSchema = JOI.object().keys({
   email: JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
@@ -243,6 +243,18 @@ exports.editDietPlan = (req, res, next) => {
     next();
   }
 };
+const deleteDietPlanSchema = JOI.object().keys({
+  id:JOI.string().required(),
+});
+
+exports.deleteDietPlan = (req, res, next) => {
+  const result = deleteDietPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
 
 
 const getAllDietPlansSchema = JOI.object().keys({
@@ -337,6 +349,32 @@ const addWorkoutExerciseSchema = JOI.object().keys({
 
 exports.addWorkoutExercise = (req, res, next) => {
   const result = addWorkoutExerciseSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const editWorkoutExerciseSchema = JOI.object().keys({
+  workoutId:JOI.string().required(),
+  exercise_name: JOI.string().required(),
+  category: JOI.string().required(),
+  target_muscle: JOI.string().required(),
+  equipment: JOI.string().required(),
+  exercise_type: JOI.string().required(),
+  video_url: JOI.string().required(),
+  description: JOI.string().required(),
+  kg: JOI.number().required(),
+  RepsPerSet: JOI.number().required(),
+  Tempo: JOI.number().required(),
+  RestTime: JOI.number().required(),
+})
+
+
+
+exports.editWorkoutExercise = (req, res, next) => {
+  const result = editWorkoutExerciseSchema.validate(req.body);
   if (result.error) {
     return res.status(400).json({ msg: result.error.message });
   } else {
@@ -470,7 +508,8 @@ const getAllClientsByFilterSchema = JOI.object().keys({
   page: JOI.number().required(),
   pageSize: JOI.number().required(),
   type:JOI.string().required(),
-  filter:JOI.string().allow("")
+  filter:JOI.string().valid("",Plan_Status.AllReady,Plan_Status.UpdateNeeded,Plan_Status.FirstPlanNeeded).allow(""),
+  search:JOI.string().optional().allow("")
 });
 
 exports.getAllClientsByFilter = (req, res, next) => {
@@ -533,6 +572,7 @@ exports.getAllScheduleCheckIn = (req, res, next) => {
 };
 const scheduleCheckInByTypeSchema = JOI.object().keys({
   type: JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
+  client_id:JOI.string().required(),
 });
 
 exports.scheduleCheckInByType = (req, res, next) => {
@@ -548,16 +588,16 @@ exports.scheduleCheckInByType = (req, res, next) => {
 const scheduleCheckInTrackDietSchema = JOI.object().keys({
   schedule_id:JOI.string().required(),
     // client_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Users' },
-    committementLevel :JOI.string().allow(),
-    weight :JOI.string().allow(),
+    committementLevel :JOI.string().required(),
+    weight :JOI.string().required(),
     // bodyImages:JOI.string().allow(),
-    chestMeasurement:JOI.string().allow(),
-    stomachMeasurement:JOI.string().allow(),
-    waistMeasurement:JOI.string().allow(),
-    hipsMeasurement:JOI.string().allow(),
-    thighMeasurement:JOI.string().allow(),
-    calvesMeasurement:JOI.string().allow(),
-    reviewExperience:JOI.string().allow(),
+    chestMeasurement:JOI.string().required(),
+    stomachMeasurement:JOI.string().required(),
+    waistMeasurement:JOI.string().required(),
+    hipsMeasurement:JOI.string().required(),
+    thighMeasurement:JOI.string().required(),
+    calvesMeasurement:JOI.string().required(),
+    reviewExperience:JOI.string().required(),
 });
 
 exports.scheduleCheckInTrackDiet = (req, res, next) => {
@@ -593,9 +633,14 @@ exports.scheduleCheckInTrackWorkout = (req, res, next) => {
 
 
 const assignCoachSchema = JOI.object().keys({
-  type:JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
-  _id:JOI.string().required(),
+  assign:JOI.array().items(
+    JOI.object({
+      type:JOI.string().valid(ScheduleCheckInType.Diet,ScheduleCheckInType.Workout).required(),
+      _id:JOI.string().required(),
+    })),
   clientId:JOI.string().required()
+
+ 
 });
 
 exports.assignCoach = (req, res, next) => {
@@ -623,3 +668,317 @@ exports.getAllCoach = (req, res, next) => {
     next();
   }
 };
+
+const getAllWorkoutExercisesScehma = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  search: JOI.string().allow(),
+});
+
+exports.getAllWorkoutExercises = (req, res, next) => {
+  const result = getAllWorkoutExercisesScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+
+
+const generateSupportTicketScehma = JOI.object().keys({
+  name: JOI.string().required(),
+  email:  JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
+  department: JOI.string().required(),
+  description:JOI.string().optional(),
+});
+
+exports.generateSupportTicket = (req, res, next) => {
+  const result = generateSupportTicketScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const AddRoleScehma = JOI.object().keys({
+  full_name: JOI.string().required(),
+  email:  JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
+  password: JOI.string().required(),
+  role: JOI.string().valid(Roles.coach,Roles.customerSupport,Roles.staff,Roles.teamLead).required(),
+});
+
+exports.AddRole = (req, res, next) => {
+  const result = AddRoleScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+
+const getSupportTicketByTypeSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  type:JOI.string().valid("All","Pending","Processing","Resolved").required(),
+});
+
+exports.getSupportTicketByType = (req, res, next) => {
+  const result = getSupportTicketByTypeSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const updateTicketStatusSchema = JOI.object().keys({
+  _id: JOI.string().required(),
+  status:JOI.string().valid("Pending","Processing","Resolved").required(),
+});
+
+exports.updateTicketStatus = (req, res, next) => {
+  const result = updateTicketStatusSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const chatOnTicketSchema = JOI.object().keys({
+  supportTicket_id: JOI.string().required(),
+  // client_id: JOI.string().required(),
+  message: JOI.string().required()
+});
+
+exports.chatOnTicket = (req, res, next) => {
+  const result = chatOnTicketSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getSupportTicketChatByIdSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  ticket_id:JOI.string().required(),
+  client_id:JOI.string().required(),
+});
+
+exports.getSupportTicketChatById = (req, res, next) => {
+  const result = getSupportTicketChatByIdSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getAllFoodItemsSchema = JOI.object().keys({
+  page: JOI.number().optional(),
+  pageSize: JOI.number().optional(),
+  search:JOI.string().optional(),
+});
+
+exports.getAllFoodItems = (req, res, next) => {
+  const result = getAllFoodItemsSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const getAllFoodRecipeSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+});
+
+exports.getAllFoodRecipe = (req, res, next) => {
+  const result = getAllFoodRecipeSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const AddSupplementSchema = JOI.object().keys({
+  name: JOI.string().required(),
+});
+
+exports.AddSupplement = (req, res, next) => {
+  const result = AddSupplementSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getTeamLeadClientsByFilterSchema = JOI.object().keys({
+  filter:JOI.string().valid("","Assigned Clients","Unassigned Clients").allow(""),
+  type:JOI.string().valid("All","Diet Plans","Workout Plans").required(),
+  page:JOI.number().required(),
+  pageSize:JOI.number().required()
+});
+
+exports.getTeamLeadClientsByFilter = (req, res, next) => {
+  const result = getTeamLeadClientsByFilterSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const getAllPlansByFilterSchema = JOI.object().keys({
+  filter:JOI.string().valid("","Diet Plans","Workout Plans").allow(""),
+  search:JOI.string().allow(""),
+  page:JOI.number().required(),
+  pageSize:JOI.number().required()
+});
+
+exports.getAllPlansByFilter = (req, res, next) => {
+  const result = getAllPlansByFilterSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getAllCoachSchema = JOI.object().keys({
+  search:JOI.string().allow(""),
+  page:JOI.number().required(),
+  pageSize:JOI.number().required()
+});
+
+exports.getAllCoach = (req, res, next) => {
+  const result = getAllCoachSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const getCoachAdminDataSchema = JOI.object().keys({
+  _id:JOI.string().required(),
+});
+
+exports.getCoachAdminData = (req, res, next) => {
+  const result = getCoachAdminDataSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getCustomerSupportByIDScehma = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  _id:JOI.string().required()
+});
+
+exports.getCustomerSupportByID = (req, res, next) => {
+  const result = getCustomerSupportByIDScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const editProfileScehma = JOI.object().keys({
+  full_name : JOI.string().required(),
+  bio: JOI.string().required(),
+  status:JOI.string().required()
+});
+
+exports.editProfile = (req, res, next) => {
+  const result = editProfileScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const getStaffClientsByFilterSchema = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  filter:JOI.string().valid("All Plans","Active Plans" ,"Freezed Plans" ,"Expired Plans"),
+  search:JOI.string().optional().allow("")
+});
+
+exports.getStaffClientsByFilter = (req, res, next) => {
+  const result = getStaffClientsByFilterSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+const changeSubscriptionStatusByClientIdScehma = JOI.object().keys({
+  client_id: JOI.string().required(),
+  subscriptionId: JOI.string().required(),
+  status: JOI.string().required().valid("Active","Freezed"),
+  freezDuaration: JOI.number().required()
+});
+
+exports.changeSubscriptionStatusByClientId = (req, res, next) => {
+  const result = changeSubscriptionStatusByClientIdScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const importDataSchema = JOI.object().keys({
+  page:JOI.number().required(),
+  pageSize:JOI.number().required()
+});
+
+exports.importData = (req, res, next) => {
+  const result = importDataSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const importDietPlanSchema = JOI.object().keys({
+  dietPlanID:JOI.string().required(),
+  client_id:JOI.string().required(),
+
+});
+
+exports.importDietPlan = (req, res, next) => {
+  const result = importDietPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const importWorkoutPlanSchema = JOI.object().keys({
+  workoutPlanID:JOI.string().required(),
+  client_id:JOI.string().required(),
+
+});
+
+exports.importWorkoutPlan = (req, res, next) => {
+  const result = importWorkoutPlanSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+

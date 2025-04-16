@@ -15,7 +15,7 @@
     "cors": "^2.8.5",
     "debug": "~2.6.9",
     "dotenv": "^16.4.5",
-    "express": "~4.16.1",
+    "express": "^4.21.2",
     "express-generator": "^4.16.1",
     "fs": "^0.0.1-security",
     "http-errors": "~1.6.3",
@@ -29,6 +29,7 @@
     "nodemon": "^3.1.9",
     "socket.io": "^4.8.1",
     "socket.io-client": "^4.8.1",
-    "socketio-auth": "^0.1.1"
+    "socketio-auth": "^0.1.1",
+    "stripe": "^17.7.0"
   }
 }

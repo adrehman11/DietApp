@@ -1,9 +1,11 @@
 
 var mongoose = require('mongoose');
+const {Plan_Status,Subscription_Status} = require("../Helpers/constants")
 const {DietApp} = require('../utility/connection');
 var bcrypt = require('bcrypt-nodejs');
 var UserSchema = new mongoose.Schema({
     full_name: {type: String,default :null},
+    image: {type: String,default :null},
     email: {type: String,default:null},
     phoneNumber: {type: String,default:null},
     isLogin:{type: Boolean,default:false},
@@ -16,8 +18,8 @@ var UserSchema = new mongoose.Schema({
     coach_id: { type: mongoose.Schema.Types.ObjectId, ref: 'Coach' },
     workoutCoach_id:{ type: mongoose.Schema.Types.ObjectId, ref: 'Coach' },
     diet_plan_status: {type: String,default :null},
-    workout_plan_status: {type: String,default :null},
-    subsctiption_status: {type: String,default :null},
+    workout_plan_status: {type: String,default :Plan_Status.FirstPlanNeeded},
+    subscription_status: {type: String,default :Subscription_Status.NotStarted},
 },
 { timestamps: true });
 

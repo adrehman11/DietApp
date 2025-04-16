@@ -3,9 +3,9 @@ const Router = express.Router();
 const UserController = require("../../controller/client_controllers/client");
 const ChatController = require("../../controller/common_controllers/chat");
 
+const UserControllerPayment = require("../../controller/client_controllers/payment");
 const upload = require("../../utility/aws")
 const authMiddleware = require("../../middlewares/clientauth");
-
 const {
     login,
     signup,
@@ -16,7 +16,10 @@ const {
     scheduleCheckInByType,
     completeExercise,
     scheduleCheckInTrackDiet,
-    scheduleCheckInTrackWorkout
+    scheduleCheckInTrackWorkout,
+    generateSupportTicket,
+    chatOnTicket,
+    getSupportTicketChatById
   } = require("../../middlewares/index");
 
   Router.post('/login',login,UserController.login);
@@ -40,6 +43,19 @@ const {
 
   //chat module
   Router.get('/inboxChat',authMiddleware,ChatController.getInboxChat);
+  //generate Ticket
+  Router.post("/createSupportTicket",authMiddleware,upload.single("image"),generateSupportTicket,UserController.createSupportTicket )
+  Router.get("/getSupportTickets",authMiddleware,UserController.getAllSupportTicket )
+  Router.post('/chatOnTicket',authMiddleware,chatOnTicket,UserController.chatOnTicket);
+  Router.post('/getChatByTicketId',authMiddleware,getSupportTicketChatById,UserController.GetChatByTicketId);
+  
+
+  //stripe routes
+  Router.post('/create-checkout-session',authMiddleware,UserControllerPayment.checkout_session);
+  Router.get('/success',UserControllerPayment.success_session);
+  Router.post('/create-checkout-session',UserControllerPayment.checkout_session);
+
+
   
 
   module.exports = Router;
