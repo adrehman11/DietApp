@@ -75,11 +75,9 @@ module.exports.socketsConnection = async (server) => {
               });
       
               io.to(socket.id).emit("messageSent", newMessage);
-              console.log("asdad");
-      
-              if (onlineUsers.has(data.receiverId.toString())) {
+              if (onlineUsers.has(data.recieverId.toString())) {
                 const receiverSocketId = onlineUsers.get(
-                  data.receiverId.toString()
+                  data.recieverId.toString()
                 );
                 io.to(receiverSocketId).emit("newMessage", newMessage);
               }
@@ -89,6 +87,16 @@ module.exports.socketsConnection = async (server) => {
             socket.emit("messageError", { msg: "Internal server error" }); //Handle unexpected errors
           }
         });
+        socket.on("check", async function () {
+          try {
+            console.log(onlineUsers)
+            console.log(socket.user.id);
+          } catch (error) {
+            console.error("Error in getInboxChatRooms:", error);
+            socket.emit("messageError", { msg: "Internal server error" });
+          }
+        }
+        );
       });
   } catch (err) {
     console.log(err);
