@@ -653,7 +653,7 @@ exports.getAllDietPlansToImport = async function (req, res) {
   try {
     let coach = req.user;
     let page = req.body.page;
-    let pageSize = req.body.limit;
+    let pageSize = req.body.pageSize;
     const skip = (page - 1) * pageSize;
     let query = {};
     let data = await DietPlan.find(query)
@@ -668,17 +668,13 @@ exports.getAllDietPlansToImport = async function (req, res) {
           options: { strictPopulate: false },
         },
       })
-      // .populate({
-      //   path: "client_id",
-      //   select:
-      //     "_id full_name email role diet_plan_status workout_plan_status subscription_status",
-      // })
       .populate({
         path: "coach_id",
         select: "_id image full_name email role U_ID",
       })
       .lean();
     const TotalDocuments = await DietPlan.countDocuments(query);
+    let dietPlansWithNutrients = calculateTotalNutrients(data);
 
     // for (let plan of data) {
     //   let formData = await Form.findOne({
@@ -743,7 +739,7 @@ exports.getAllDietPlansToImport = async function (req, res) {
 
     return res
       .status(200)
-      .json({ data, TotalDocuments, page, pageSize });
+      .json({ dietPlansWithNutrients, TotalDocuments, page, pageSize });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
@@ -754,7 +750,7 @@ exports.getAllWorkoutPlanToImport  = async function (req, res) {
   try {
     let coach = req.user;
     let page = req.body.page;
-    let pageSize = req.body.limit;
+    let pageSize = req.body.pageSize;
     const skip = (page - 1) * pageSize;
     let query = {};
     let data = await WorkoutPlan.find(query)
