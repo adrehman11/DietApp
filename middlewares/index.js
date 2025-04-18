@@ -941,7 +941,8 @@ exports.changeSubscriptionStatusByClientId = (req, res, next) => {
 const importDataSchema = JOI.object().keys({
   page:JOI.number().required(),
   pageSize:JOI.number().required(),
-  search:JOI.string().optional(),
+  search:JOI.string().optional().allow("")
+
 });
 
 exports.importData = (req, res, next) => {

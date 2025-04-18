@@ -675,7 +675,7 @@ exports.getAllDietPlansToImport = async function (req, res) {
         select: "_id image full_name email role U_ID",
       })
       .lean();
-    const TotalDocuments = await DietPlan.countDocuments(query);
+    const TotalDocuments = await DietPlan.countDocuments(searchFilter);
     let dietPlansWithNutrients = calculateTotalNutrients(data);
 
     // for (let plan of data) {
@@ -770,7 +770,7 @@ exports.getAllWorkoutPlanToImport  = async function (req, res) {
         select: "_id image full_name email role U_ID",
       })
       .lean();
-    const TotalDocuments = await WorkoutPlan.countDocuments(query);
+    const TotalDocuments = await WorkoutPlan.countDocuments(searchFilter);
     return res.status(200).json({ data, TotalDocuments, page, pageSize });
   } catch (err) {
     console.log(err);
