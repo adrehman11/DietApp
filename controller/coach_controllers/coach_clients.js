@@ -1,6 +1,8 @@
 const { Coach } = require("../../models/coach_model");
 const { Form } = require("../../models/form_model");
 const { User } = require("../../models/client_model");
+const { Subscription } = require("../../models/subscription_model");
+
 const { Roles, Form_Types, Plan_Status } = require("../../Helpers/constants");
 const JWT = require("jsonwebtoken");
 const mongoose = require("mongoose");
