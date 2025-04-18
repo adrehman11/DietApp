@@ -940,7 +940,8 @@ exports.changeSubscriptionStatusByClientId = (req, res, next) => {
 
 const importDataSchema = JOI.object().keys({
   page:JOI.number().required(),
-  pageSize:JOI.number().required()
+  pageSize:JOI.number().required(),
+  search:JOI.string().optional(),
 });
 
 exports.importData = (req, res, next) => {
@@ -981,4 +982,20 @@ exports.importWorkoutPlan = (req, res, next) => {
     next();
   }
 };
+const inboxChatByRoomIdSchema = JOI.object().keys({
+  page:JOI.number().required(),
+  pageSize:JOI.number().required(),
+  chatRoomId:JOI.string().required(),
+
+});
+
+exports.inboxChatByRoomId = (req, res, next) => {
+  const result = inboxChatByRoomIdSchema.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
 

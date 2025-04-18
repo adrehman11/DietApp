@@ -655,8 +655,10 @@ exports.getAllDietPlansToImport = async function (req, res) {
     let page = req.body.page;
     let pageSize = req.body.pageSize;
     const skip = (page - 1) * pageSize;
-    let query = {};
-    let data = await DietPlan.find(query)
+    const searchFilter = req.body.search
+      ? { name: { $regex: req.body.search, $options: "i" } }
+      : {};
+    let data = await DietPlan.find(searchFilter)
       .skip(skip)
       .limit(pageSize)
       .populate({
@@ -752,8 +754,10 @@ exports.getAllWorkoutPlanToImport  = async function (req, res) {
     let page = req.body.page;
     let pageSize = req.body.pageSize;
     const skip = (page - 1) * pageSize;
-    let query = {};
-    let data = await WorkoutPlan.find(query)
+    const searchFilter = req.body.search
+    ? { name: { $regex: req.body.search, $options: "i" } }
+    : {};
+    let data = await WorkoutPlan.find(searchFilter)
       .skip(skip)
       .limit(pageSize)
       // .populate({

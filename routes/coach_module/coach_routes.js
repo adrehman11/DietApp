@@ -1,6 +1,7 @@
 var express = require('express');
 const Router = express.Router();
 const CoachController = require("../../controller/coach_controllers/coach.js");
+const ChatController = require("../../controller/common_controllers/chat.js");
 const Coach_client_Controller = require("../../controller/coach_controllers/coach_clients");
 const Coach_Plans = require("../../controller/coach_controllers/coach_plans");
 const Schedule_checkIn = require("../../controller/coach_controllers/schedule");
@@ -87,6 +88,9 @@ const {
   Router.post('/getAllWorkoutPlansToImport',authorization([Roles.coach]),importData,Coach_Plans.getAllWorkoutPlanToImport);
   Router.post('/importDietPlan',authorization([Roles.coach]),importDietPlan,Coach_Plans.importDietPlan);
   Router.post('/importWorkoutPlan',authorization([Roles.coach]),importWorkoutPlan,Coach_Plans.importWorkoutPlan);
+
+  //chat module
+  Router.get('/inboxChat',authorization([Roles.coach]),ChatController.getInboxChatRooms);
 
 
 

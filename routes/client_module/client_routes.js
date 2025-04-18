@@ -1,6 +1,8 @@
 var express = require('express');
 const Router = express.Router();
 const UserController = require("../../controller/client_controllers/client");
+const ChatController = require("../../controller/common_controllers/chat");
+
 const UserControllerPayment = require("../../controller/client_controllers/payment");
 const upload = require("../../utility/aws")
 const authMiddleware = require("../../middlewares/clientauth");
@@ -17,7 +19,8 @@ const {
     scheduleCheckInTrackWorkout,
     generateSupportTicket,
     chatOnTicket,
-    getSupportTicketChatById
+    getSupportTicketChatById,
+    inboxChatByRoomId,
   } = require("../../middlewares/index");
 
   Router.post('/login',login,UserController.login);
@@ -39,6 +42,9 @@ const {
   Router.post('/scheduleCheckInDiet',authMiddleware,upload.single("bodyImage"),scheduleCheckInTrackDiet, UserController.ScheduleCheckInTrackDiet)
   Router.post('/scheduleCheckInWorkout',authMiddleware,scheduleCheckInTrackWorkout, UserController.ScheduleCheckInTrackWorkout)
 
+  //chat module
+  Router.get('/inboxChatRooms',authMiddleware,ChatController.getInboxChatRooms);
+  Router.post('/inboxChatByRoomId',authMiddleware,inboxChatByRoomId,ChatController.getInboxChatByRoomId);
   //generate Ticket
   Router.post("/createSupportTicket",authMiddleware,upload.single("image"),generateSupportTicket,UserController.createSupportTicket )
   Router.get("/getSupportTickets",authMiddleware,UserController.getAllSupportTicket )
