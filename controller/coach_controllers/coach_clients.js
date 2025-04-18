@@ -745,10 +745,15 @@ exports.getClientById = async function (req, res) {
             .lean();
 
         const forms = await Form.findOne({ client_id: req.body.client_id }).lean();
+        const subscriptionData = await Subscription.find({
+            user_id: req.body.client_id,
+          });
         const responseData = {
             ...users,
             formData: forms,
+            subscriptionData: subscriptionData,
         };
+        
 
         return res.status(200).json(responseData);
     } catch (err) {
