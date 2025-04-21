@@ -456,6 +456,23 @@ exports.getWorkoutplanById = async function (req, res) {
     res.status(500).json(err);
   }
 };
+exports.deletePlanByid = async function (req, res) {
+  try {
+    let client = req.user;
+
+    const workoutPlan = await WorkoutPlan.findById(req.body.id);
+    if (!workoutPlan) {
+      return res.status(404).json({ message: "Workout plan not found" });
+    }
+
+    // Delete the workout plan
+    await WorkoutPlan.findByIdAndDelete(req.body.id);
+    res.status(200).json({ message: "Workout plan deleted successfully" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};
 
 exports.getAllPlansByCoach = async function (req, res) {
   try {

@@ -60,6 +60,8 @@ const {
   Router.post('/get/workoutExercises',authorization([Roles.coach,Roles.teamLead,Roles.admin]),AllWorkoutExercise,Coach_Plans.getAllWorkoutExercises);
   Router.post('/create/workoutPlan',authorization([Roles.coach,Roles.teamLead,Roles.admin]),createWorkoutPlan,Coach_Plans.createWorkoutPlan);
   Router.post('/edit/workoutPlan',authorization([Roles.coach,Roles.teamLead,Roles.admin]),editWorkoutPlan,Coach_Plans.editWorkoutPlan);
+  Router.post('/delete/WorkoutPlan',authorization([Roles.coach,Roles.teamLead,Roles.admin]),deleteDietPlan,Coach_Plans.deletePlanByid);
+
   
   Router.post('/get/workoutPlan',authorization([Roles.coach,Roles.teamLead,Roles.admin]),getAllWorkoutPlans,Coach_Plans.getAllWorkoutplan);
   Router.post('/get/workoutPlanById',authorization([Roles.coach,Roles.teamLead,Roles.admin]),getWorkoutPlanID,Coach_Plans.getWorkoutplanById);
