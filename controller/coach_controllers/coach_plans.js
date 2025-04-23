@@ -481,7 +481,16 @@ exports.getAllPlansByCoach = async function (req, res) {
     let page = req.body.page;
     let pageSize = req.body.pageSize;
     const skip = (page - 1) * pageSize;
-    let query = { coach_id: coach._id };
+    let query = {};
+    if(coach.role == Roles.coach)
+    {
+      query = { coach_id: coach._id };
+
+    }
+    else if(coach.role == Roles.teamLead || coach.role == Roles.admin)
+    {
+      query = { };
+    }
 
     if (req.body.filter == "") {
       if (req.body.search != "") {

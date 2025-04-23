@@ -82,7 +82,7 @@ const {
 
 
   //plan history
-  Router.post('/getAllPlansByFilter',authorization([Roles.coach]),getAllPlansByFilter,Coach_Plans.getAllPlansByCoach);
+  Router.post('/getAllPlansByFilter',authorization([Roles.coach,Roles.teamLead]),getAllPlansByFilter,Coach_Plans.getAllPlansByCoach);
 
 
   //import data 
