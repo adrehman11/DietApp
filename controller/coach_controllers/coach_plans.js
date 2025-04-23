@@ -19,6 +19,7 @@ const {
 const JWT = require("jsonwebtoken");
 const mongoose = require("mongoose");
 const { User } = require("../../models/client_model");
+const { Coach } = require("../../models/coach_model");
 
 exports.getMealsAndCategory = async function (req, res) {
   try {
@@ -797,11 +798,15 @@ exports.getAllWorkoutPlanToImport  = async function (req, res) {
 
 exports.importDietPlan = async function (req, res) {
   try {
-    let coach = req.user;
+    // let coach = req.user;
     let data = await DietPlan.findOne({ _id: req.body.dietPlanID })
     if(!data) {
       throw "No Data found";
     } 
+    let coachData = await Coach.findOne({ _id: req.body.coach_id })
+    if(!coachData) {
+      throw "No Coach found";
+    }
     let newDietPlan = {
       name:data.name,
       numberOfDays:data.numberOfDays,
@@ -809,7 +814,7 @@ exports.importDietPlan = async function (req, res) {
       status: DietPlanStatus.Saved,
       _id: new mongoose.Types.ObjectId(),
       client_id: req.body.client_id,
-      coach_id: coach._id,
+      coach_id: req.body.coach_id,
       coach_notes:data.coach_notes,
     };
     await DietPlan.create(newDietPlan);
@@ -827,10 +832,14 @@ exports.importDietPlan = async function (req, res) {
 
 exports.importWorkoutPlan = async function (req, res) {
   try {
-    let coach = req.user;
+    // let coach = req.user;
     let data = await WorkoutPlan.findOne({ _id: req.body.workoutPlanID })
     if(!data) {
       throw "No Data found";
+    }
+    let coachData = await Coach.findOne({ _id: req.body.coach_id })
+    if(!coachData) {
+      throw "No Coach found";
     }
     let newWorkoutPlan = {
       name:data.name,
@@ -839,7 +848,7 @@ exports.importWorkoutPlan = async function (req, res) {
       status: WorkoutPlanStatus.Saved,
       _id: new mongoose.Types.ObjectId(),
       client_id: req.body.client_id,
-      coach_id: coach._id,
+      coach_id: req.body.coach_id,
       coach_notes:data.coach_notes,
     };
     await WorkoutPlan.create(newWorkoutPlan);

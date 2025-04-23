@@ -956,6 +956,7 @@ exports.importData = (req, res, next) => {
 
 const importDietPlanSchema = JOI.object().keys({
   dietPlanID:JOI.string().required(),
+  coach_id:JOI.string().required(),
   client_id:JOI.string().required(),
 
 });
@@ -971,6 +972,7 @@ exports.importDietPlan = (req, res, next) => {
 
 const importWorkoutPlanSchema = JOI.object().keys({
   workoutPlanID:JOI.string().required(),
+  coach_id:JOI.string().required(),
   client_id:JOI.string().required(),
 
 });
