@@ -28,7 +28,8 @@ exports.login = async function (req, res) {
         
          //login work
          await Coach.updateOne({ _id: data._id  },{isLogin:true})
-        return res.status(200).json({ token:token });
+         
+        return res.status(200).json({ token:token, email:data.email,role:data.role,U_ID:data.U_ID,id:data._id,image:data.image,full_name:data.full_name,bio:data.bio,status:data.status });
     }
     catch (err) {
         console.log(err)
