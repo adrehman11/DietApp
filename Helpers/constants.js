@@ -38,6 +38,7 @@ const Subscription_Status = {
    Expired:"Expired",
    NotStarted:"Not Started",
    Freezed:"Freezed",
+   ReFunded:"Refunded",
 
 }
  

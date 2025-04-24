@@ -16,6 +16,7 @@ var SubscriptionSchema = new mongoose.Schema({
     subscriptionId:{type:String},
     subscription_status:{type:String},
     freezDuaration:{type:Number},
+    paymentIntentId:{type:String},
 },
 { timestamps: true });
 

@@ -86,7 +86,7 @@ function calculateTotalNutrientsForPlan(plan) {
   }
 }
 
-async function subscribSuccess(session, subscription) {
+async function subscribSuccess(session, subscription,paymentIntentId) {
   try {
     const userId = session.metadata?.userId;
     let userData = await User.findOne({ _id: userId });
@@ -100,17 +100,17 @@ async function subscribSuccess(session, subscription) {
     });
     if (!subscriptionData) {
       let subscriptionName = "";
-      if (subscription.plan.id == process.env.STARTER_SUBSCRIPTION_PRICE_ID) {
-        subscriptionName = "Starter"
+      if (subscription.plan.id == process.env.STANDARD_SUBSCRIPTION_PRICE_ID) {
+        subscriptionName = "Standard"
       }
-      if (subscription.plan.id == process.env.PRO_SUBSCRIPTION_PRICE_ID) {
-        subscriptionName = "Pro"
+      if (subscription.plan.id == process.env.PREMIUM_SUBSCRIPTION_PRICE_ID) {
+        subscriptionName = "Premium"
 
       }
-      if (subscription.plan.id == process.env.VIP_SUBSCRIPTION_PRICE_ID) {
-        subscriptionName = "Vip"
+      // if (subscription.plan.id == process.env.VIP_SUBSCRIPTION_PRICE_ID) {
+      //   subscriptionName = "Vip"
 
-      }
+      // }
       const sessionId = session.id;
       const customerId = session.customer;
       const invoice = session.invoice;
@@ -132,7 +132,8 @@ async function subscribSuccess(session, subscription) {
         createdAt: createdAt,
         currentPeriodEnd: currentPeriodEnd,
         currentPeriodStart: currentPeriodStart,
-        subscriptionName:subscriptionName
+        subscriptionName:subscriptionName,
+        paymentIntentId:paymentIntentId
       });
       await User.updateOne({_id:userId},{$set:{subscription_status:Subscription_Status.Active}})
     }

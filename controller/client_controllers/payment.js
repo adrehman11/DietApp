@@ -1,30 +1,29 @@
 const { User } = require("../../models/client_model");
 const jwt = require("jsonwebtoken");
-const {
-  Roles,
-  Form_Types,
-  Form_Status,
-  Plan_Status,
-  Subscription_Status,
-  DietPlanStatus,
-  FoodCategory,
-  WorkoutPlanStatus,
-} = require("../../Helpers/constants");
-const {subscribe,subscribSuccess} = require("../../Helpers/helperFunction")
+// const {
+//   Roles,
+//   Form_Types,
+//   Form_Status,
+//   Plan_Status,
+//   Subscription_Status,
+//   DietPlanStatus,
+//   FoodCategory,
+//   WorkoutPlanStatus,
+// } = require("../../Helpers/constants");
+const { subscribe, subscribSuccess } = require("../../Helpers/helperFunction");
+const { Subscription } = require("../../models/subscription_model");
+const { Subscription_Status } = require("../../Helpers/constants");
 const stripe = require("stripe")(process.env.STRIPE_SECRETE_KEY);
 
 exports.checkout_session = async function (req, res) {
   try {
-
     let user = req.user;
     let pakage = req.query.plan;
     let Price_id;
-    if (pakage == "Starter") {
-      Price_id = process.env.STARTER_SUBSCRIPTION_PRICE_ID;
-    } else if (pakage == "Pro") {
-      Price_id = process.env.PRO_SUBSCRIPTION_PRICE_ID;
-    } else if (pakage == "Vip") {
-      Price_id = process.env.VIP_SUBSCRIPTION_PRICE_ID;
+    if (pakage == "Standard") {
+      Price_id = process.env.STANDARD_SUBSCRIPTION_PRICE_ID;
+    } else if (pakage == "Premium") {
+      Price_id = process.env.PREMIUM_SUBSCRIPTION_PRICE_ID;
     } else {
       return res.status(400).json({ msg: "Invalid Pakage type" });
     }
@@ -39,6 +38,7 @@ exports.checkout_session = async function (req, res) {
       metadata: {
         userId: user.id, // Attach your user's DB _id
       },
+      // success_url: `http://localhost:3000/client/success?session_id={CHECKOUT_SESSION_ID}`,
       success_url: `https://dev-api.dietncheat.ca/client/success?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `https://dev-buy.dietncheat.ca/`,
     });
@@ -51,15 +51,17 @@ exports.checkout_session = async function (req, res) {
 
 exports.success_session = async function (req, res) {
   try {
-
     const session = await stripe.checkout.sessions.retrieve(
       req.query.session_id
     );
     const subscriptionId = session.subscription;
-    const subscription = await stripe.subscriptions.retrieve(
-      subscriptionId
-    );
-    await subscribSuccess(session,subscription)
+    const subscription = await stripe.subscriptions.retrieve(subscriptionId);
+    const invoiceId = subscription.latest_invoice;
+    const invoice = await stripe.invoices.retrieve(invoiceId);
+
+    const paymentIntentId = invoice.payment_intent;
+ 
+    await subscribSuccess(session, subscription,paymentIntentId);
 
     res.redirect("https://dev-buy.dietncheat.ca/");
   } catch (err) {
@@ -128,7 +130,7 @@ exports.webhook = async function (req, res) {
         }
 
         const userId = subscription.metadata?.userId; // Retrieve user ID from metadata
-        await subscribe (subscription,userId,subscriptionId)
+        await subscribe(subscription, userId, subscriptionId);
       default:
       // console.log(`Unhandled event type ${event.type}`);
     }
@@ -149,3 +151,33 @@ exports.webhook = async function (req, res) {
 //     res.status(500).json(err)
 //   }
 // }
+exports.refundSales = async function (req, res) {
+  try{
+    let clientSub = await Subscription.findOne({user_id:req.body.client_id})
+    if(!clientSub){
+      return res.status(400).json({msg:"No Subscription Found"})
+    }
+    const refund = await stripe.refunds.create({
+      payment_intent: clientSub.paymentIntentId,
+      reason: 'requested_by_customer',
+    });
+    if(!refund){
+      return res.status(400).json({msg:"Refund Failed"})
+    }
+    if(refund.status == "succeeded"){
+      await Subscription.updateOne({user_id:req.body.client_id},{$set:{paymentStatus:Subscription_Status.ReFunded}})
+      await User.updateOne({_id:req.body.client_id},{$set:{subscription_status:Subscription_Status.ReFunded}})
+      return res.status(200).json({msg:"Refunded Successfully"})
+    }
+    else
+    {
+      return res.status(400).json({msg:"Something went wrong"})
+
+    }
+  }
+  catch(err)
+  {
+    console.log(err);
+    return res.status(500).json(err);
+  }
+}
