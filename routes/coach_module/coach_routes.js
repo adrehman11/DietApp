@@ -35,7 +35,8 @@ const {
     editProfile,
     importData,
     importDietPlan,
-    importWorkoutPlan
+    importWorkoutPlan,
+    inboxChatByRoomId
   } = require("../../middlewares/index");
 
 
@@ -93,6 +94,8 @@ const {
 
   //chat module
   Router.get('/inboxChat',authorization([Roles.coach]),ChatController.getInboxChatRooms);
+  Router.post('/inboxChatByRoomId',authorization([Roles.coach]),inboxChatByRoomId,ChatController.getInboxChatByRoomId);
+  
 
 
 
