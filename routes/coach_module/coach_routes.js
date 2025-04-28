@@ -82,14 +82,14 @@ const {
 
 
   //plan history
-  Router.post('/getAllPlansByFilter',authorization([Roles.coach,Roles.teamLead]),getAllPlansByFilter,Coach_Plans.getAllPlansByCoach);
+  Router.post('/getAllPlansByFilter',authorization([Roles.coach,Roles.teamLead,Roles.admin]),getAllPlansByFilter,Coach_Plans.getAllPlansByCoach);
 
 
   //import data 
-  Router.post('/getAllDietPlansToImport',authorization([Roles.coach,Roles.teamLead]),importData,Coach_Plans.getAllDietPlansToImport);
-  Router.post('/getAllWorkoutPlansToImport',authorization([Roles.coach,Roles.teamLead]),importData,Coach_Plans.getAllWorkoutPlanToImport);
-  Router.post('/importDietPlan',authorization([Roles.coach,Roles.teamLead]),importDietPlan,Coach_Plans.importDietPlan);
-  Router.post('/importWorkoutPlan',authorization([Roles.coach,Roles.teamLead]),importWorkoutPlan,Coach_Plans.importWorkoutPlan);
+  Router.post('/getAllDietPlansToImport',authorization([Roles.coach,Roles.teamLead,Roles.admin]),importData,Coach_Plans.getAllDietPlansToImport);
+  Router.post('/getAllWorkoutPlansToImport',authorization([Roles.coach,Roles.teamLead,Roles.admin]),importData,Coach_Plans.getAllWorkoutPlanToImport);
+  Router.post('/importDietPlan',authorization([Roles.coach,Roles.teamLead,Roles.admin]),importDietPlan,Coach_Plans.importDietPlan);
+  Router.post('/importWorkoutPlan',authorization([Roles.coach,Roles.teamLead,Roles.admin]),importWorkoutPlan,Coach_Plans.importWorkoutPlan);
 
   //chat module
   Router.get('/inboxChat',authorization([Roles.coach]),ChatController.getInboxChatRooms);
