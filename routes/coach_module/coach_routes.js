@@ -41,8 +41,8 @@ const {
 
 
   Router.post('/login',login,CoachController.login);
-  Router.post('/editProfile',authorization([Roles.coach,Roles.teamLead,Roles.admin]),upload.single("image"),editProfile,CoachController.editProfile);
-  Router.get('/getProfileDetails',authorization([Roles.coach,Roles.teamLead,Roles.admin]),CoachController.getProfileData);
+  Router.post('/editProfile',authorization([Roles.coach,Roles.staff,Roles.teamLead,Roles.admin]),upload.single("image"),editProfile,CoachController.editProfile);
+  Router.get('/getProfileDetails',authorization([Roles.coach,Roles.staff,Roles.teamLead,Roles.admin]),CoachController.getProfileData);
   Router.post('/getAllClientsByFilter',authorization([Roles.coach,Roles.teamLead,Roles.admin]),getAllClientsByFilter,Coach_client_Controller.getClientsByFilter);
   Router.post('/getClientById',authorization([Roles.coach,Roles.teamLead,Roles.admin]),getClientById,Coach_client_Controller.getClientById);
 

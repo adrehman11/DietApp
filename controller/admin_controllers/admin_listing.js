@@ -23,6 +23,7 @@ exports.getAllCoach = async function (req, res) {
         }
       : { role: Roles.coach };
     let data = await Coach.find(searchFilter)
+      .sort({ createdAt: -1 })
       .skip(skip)
       .limit(pageSize)
       .select("full_name bio status email U_ID");

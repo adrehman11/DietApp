@@ -79,6 +79,7 @@ exports.getTeamClientsByFilter = async function (req, res) {
                 path: "workoutCoach_id",
                 select: "_id image full_name email role U_ID",
             })
+            .sort({ createdAt: -1 })
             .limit(pageSize)
             .skip(skip)
             .exec(); // Extract user IDs to fetch associated form data
@@ -138,6 +139,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -185,6 +187,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -235,6 +238,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -289,6 +293,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -346,6 +351,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -394,6 +400,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -441,6 +448,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -488,6 +496,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -547,6 +556,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -595,6 +605,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -644,6 +655,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
@@ -693,6 +705,7 @@ exports.getClientsByFilter = async function (req, res) {
                         path: "workoutCoach_id",
                         select: "_id image full_name email role U_ID",
                     })
+                    .sort({ createdAt: -1 })
                     .limit(pageSize)
                     .skip(skip)
                     .exec();
