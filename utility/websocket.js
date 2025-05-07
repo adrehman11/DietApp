@@ -72,6 +72,7 @@ module.exports.socketsConnection = async (server) => {
                 senderType:
                   socket.user.role === Roles.client ? "User" : socket.user.role,
                 text: data.message,
+                image:data.image || ""
               });
       
               io.to(socket.id).emit("messageSent", newMessage);

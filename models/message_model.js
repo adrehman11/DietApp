@@ -6,6 +6,7 @@ const MessageSchema = new mongoose.Schema({
     sender: { type: mongoose.Schema.Types.ObjectId, required: true }, // Sender ID (Client or Coach)
     senderType: { type: String, enum: ["User", "Coach"], required: true }, // Identify sender type
     text: { type: String, required: true }, // Message content
+    image: { type: String }, // Message content
     createdAt: { type: Date, default: Date.now }, // Timestamp for sorting messages
     isread: { type: Boolean, default: false }, // Read status
 }, { timestamps: true });
