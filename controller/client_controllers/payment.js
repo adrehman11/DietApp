@@ -62,6 +62,7 @@ exports.success_session = async function (req, res) {
     const paymentIntentId = invoice.payment_intent;
  
     await subscribSuccess(session, subscription,paymentIntentId);
+    
 
     res.redirect("https://buy.dietncheat.ca/paymentsuccess");
   } catch (err) {
