@@ -14,7 +14,7 @@ const {
     changeSubscriptionTypeByClientId
   } = require("../../middlewares/index");
 
-  Router.post('/login',login,StaffController.login);
+  Router.post('/login',login,StaffController.login); 
   Router.post('/getStaffClientsByFilter',authorization([Roles.staff]),getStaffClientsByFilter,StaffController.getClientsByFilter);
   Router.post('/getStaffClientById',authorization([Roles.staff]),getClientById,StaffController.getClientById);
   Router.post('/changeSubscriptionStatusByClientId',authorization([Roles.staff]),changeSubscriptionStatusByClientId,StaffController.changeSubscriptionStatusByClientId);
