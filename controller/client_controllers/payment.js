@@ -63,7 +63,7 @@ exports.success_session = async function (req, res) {
  
     await subscribSuccess(session, subscription,paymentIntentId);
 
-    res.redirect("https://dev-buy.dietncheat.ca/");
+    res.redirect("https://buy.dietncheat.ca/paymentsuccess");
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
