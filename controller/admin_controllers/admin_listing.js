@@ -141,3 +141,26 @@ exports.getCustomerSupportByID = async function (req, res) {
     res.status(500).json(err);
   }
 };
+exports.getAllStaff = async function (req, res) {
+  try {
+    const page = req.body.page || 1;
+    const pageSize = req.body.pageSize || 10;
+    const skip = (page - 1) * pageSize;
+
+    const searchFilter = req.body.search != ""
+      ? {
+          role: Roles.staff,
+          full_name: { $regex: req.body.search, $options: "i" },
+        }
+      : { role: Roles.customerSupport };
+    let data = await Coach.find(searchFilter)
+      .skip(skip)
+      .limit(pageSize)
+      .select("full_name bio status email U_ID");
+
+    return res.status(200).json(data);
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};

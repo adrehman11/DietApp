@@ -1002,3 +1002,32 @@ exports.inboxChatByRoomId = (req, res, next) => {
 };
 
 
+const getAllStaffScehma = JOI.object().keys({
+  page: JOI.number().required(),
+  pageSize: JOI.number().required(),
+  search: JOI.string().allow(),
+});
+
+exports.getAllStaff = (req, res, next) => {
+  const result = getAllStaffScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
+const changeSubscriptionTypeByClientIdScehma = JOI.object().keys({
+  client_id: JOI.string().required(),
+  subscriptionId: JOI.string().required(),
+  type: JOI.string().required().valid("Standard","Premium"),
+});
+
+exports.changeSubscriptionTypeByClientId = (req, res, next) => {
+  const result = changeSubscriptionTypeByClientIdScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};

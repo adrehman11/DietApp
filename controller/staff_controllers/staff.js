@@ -424,3 +424,28 @@ exports.changeSubscriptionStatusByClientId = async function (req, res) {
     res.status(500).json(err);
   }
 };
+
+exports.changeSubscriptionTypeByClientId = async function (req, res) {
+  try {
+    const coach = req.user;
+    const subscriptionData = await Subscription.findOne({
+      _id: req.body.subscriptionId,
+      user_id: req.body.client_id,
+    });
+    if (!subscriptionData) {
+      return res.status(401).json({ msg: "No Subscription found" });
+    }
+    await Subscription.updateOne(
+      { _id: req.body.subscriptionId },
+      {
+        $set: {
+          plan: req.body.type,
+        },
+      }
+    );
+    return res.status(200).json({ msg: "Updated" });
+  } catch (err) {
+    console.log(err);
+    res.status(500).json(err);
+  }
+};

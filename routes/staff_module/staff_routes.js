@@ -10,7 +10,8 @@ const {
     login,
     getStaffClientsByFilter,
     getClientById,
-    changeSubscriptionStatusByClientId
+    changeSubscriptionStatusByClientId,
+    changeSubscriptionTypeByClientId
   } = require("../../middlewares/index");
 
   Router.post('/login',login,StaffController.login);
@@ -18,6 +19,7 @@ const {
   Router.post('/getStaffClientById',authorization([Roles.staff]),getClientById,StaffController.getClientById);
   Router.post('/changeSubscriptionStatusByClientId',authorization([Roles.staff]),changeSubscriptionStatusByClientId,StaffController.changeSubscriptionStatusByClientId);
   Router.post('/RefundClient',authorization([Roles.staff]),getClientById,PaymentController.refundSales);
+  Router.post('/changeSubscriptionType',authorization([Roles.staff]),changeSubscriptionTypeByClientId,StaffController.changeSubscriptionTypeByClientId);
   
 
 

@@ -25,7 +25,8 @@ const {
   login,
   getAllWorkoutExercises,
   getCustomerSupportByID,
-  editWorkoutExercise
+  editWorkoutExercise,
+  getAllStaff
   } = require("../../middlewares/index");
 
   Router.post('/login',login,AdminControllerRoles.login);
@@ -55,6 +56,9 @@ Router.post('/getCoachAdminData',authorization([Roles.admin]),getCoachAdminData,
 Router.post('/getAllTeamLeads',authorization([Roles.admin]),getAllCoach,AdminControllerListing.getAllTeamleads);
 Router.post('/GetAllCustomerSupport',authorization([Roles.admin]),getAllCoach,AdminControllerListing.getAllCustomerSupport);
 Router.post('/getCustomerSupportByID',authorization([Roles.admin]),getCustomerSupportByID,AdminControllerListing.getCustomerSupportByID);
+Router.post('/GetAllStaff',authorization([Roles.admin]),getAllStaff,AdminControllerListing.getAllStaff);
+
+
 
 
   
