@@ -21,6 +21,14 @@ exports.getInboxChatRooms = async function (req, res) {
         throw " Not authorized "
     }
     let chatdata = await Chat.find(query).populate("client_id", "image coach_id diet_plan_status email full_name role  subsctiption_status workoutCoach_id workout_plan_status  _id").populate("coach_id" , "image U_ID bio email full_name role status _id")
+    for (let chat of chatdata) {
+      const lastMessage = await Message.findOne({ chat: chat._id })
+        .sort({ createdAt: -1 })
+        .select("text image createdAt") // or any other fields you want
+        .lean();
+      chat.lastMessage = lastMessage || null;
+    }
+
     return res.status(200).json(chatdata);
   } catch (err) {
     console.log(err);
