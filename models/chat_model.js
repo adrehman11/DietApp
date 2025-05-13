@@ -17,4 +17,4 @@ var ChatSchema = new mongoose.Schema({
 const Chat = DietApp.model('Chat', ChatSchema);
 module.exports = {
     Chat
-};
+}; 
