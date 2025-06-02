@@ -8,6 +8,7 @@ const JWT = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 
 const mongoose = require("mongoose");
+const { io, onlineUsers } = require("../../utility/websocket");
 
 exports.login = async function (req, res) {
   try {
@@ -36,7 +37,19 @@ exports.login = async function (req, res) {
 
     //login work
     await Coach.updateOne({ _id: data._id }, { isLogin: true });
-    return res.status(200).json({ token: token, email:data.email,role:data.role,U_ID:data.U_ID,id:data._id,image:data.image,full_name:data.full_name,bio:data.bio,status:data.status });
+    return res
+      .status(200)
+      .json({
+        token: token,
+        email: data.email,
+        role: data.role,
+        U_ID: data.U_ID,
+        id: data._id,
+        image: data.image,
+        full_name: data.full_name,
+        bio: data.bio,
+        status: data.status,
+      });
   } catch (err) {
     console.log(err);
     res.status(500).json(err);
@@ -121,6 +134,17 @@ exports.chatOnTicket = async function (req, res) {
   try {
     req.body.Support_id = req.user._id;
     await SupportTicketChat.create(req.body);
+    let ticket = await SupportTicket.findOne({
+      supportTicket_id: req.body.supportTicket_id,
+    });
+    const userId = ticket.client_id.toString();
+    const userSocketId = onlineUsers().get(userId);
+    if (userSocketId) {
+      io().to(userSocketId).emit("Notification", {
+        message: `Your have a new message on support ticket `,
+        timestamp: new Date(),
+      });
+    }
     return res.status(200).json({ message: "Response submitted" });
   } catch (err) {
     return res
@@ -146,17 +170,19 @@ exports.GetChatByTicketId = async function (req, res) {
       .select(
         "image full_name diet_plan_status workout_plan_status subscription_status"
       )
-      .populate({ path: "coach_id", select: "_id image full_name email role U_ID" })
+      .populate({
+        path: "coach_id",
+        select: "_id image full_name email role U_ID",
+      })
       .populate({
         path: "workoutCoach_id",
         select: "_id image full_name email role U_ID",
       })
       // .exec()
-      .lean()
-    
+      .lean();
 
     // Fetch all forms in a single query
-    const forms = await Form.find({ client_id:clientData._id}).exec();
+    const forms = await Form.find({ client_id: clientData._id }).exec();
 
     // Create a map of form data by client_id for quick access
     // const formsMap = forms.reduce((acc, form) => {
@@ -164,13 +190,13 @@ exports.GetChatByTicketId = async function (req, res) {
     //   return acc;
     // }, {});
 
-   let responseData = {
-    ...clientData,
-    forms
-   }
-    return res.status(200).json({data,responseData});
+    let responseData = {
+      ...clientData,
+      forms,
+    };
+    return res.status(200).json({ data, responseData });
   } catch (err) {
-    console.log(err)
+    console.log(err);
     return res
       .status(500)
       .json({ message: "Internal Server Error", error: err });

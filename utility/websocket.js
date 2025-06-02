@@ -8,15 +8,19 @@ const { Message } = require("../models/message_model");
 const socketAuth = require("socketio-auth");
 const JWT = require("jsonwebtoken");
 const { Roles } = require("../Helpers/constants");
+
+let onlineUsers = new Map();
+let ioInstance;
 module.exports.socketsConnection = async (server) => {
   try {
-    let onlineUsers = new Map();
+    // let onlineUsers = new Map();
     const io = require("socket.io")(server, {
       cors: {
         origin: "*",
       },
       transports: ["websocket", "polling"],
     });
+    ioInstance = io;
     socketAuth(io, {
       authenticate: async (socket, data, callback) => {
         try {
@@ -80,6 +84,10 @@ module.exports.socketsConnection = async (server) => {
                 const receiverSocketId = onlineUsers.get(
                   data.recieverId.toString()
                 );
+                io.to(receiverSocketId).emit("Notification", {
+                  message: `Your have a new chat message`,
+                  timestamp: new Date(),
+                });
                 io.to(receiverSocketId).emit("newMessage", newMessage);
               }
             }
@@ -99,6 +107,8 @@ module.exports.socketsConnection = async (server) => {
         }
         );
       });
+    return io;
+  
   } catch (err) {
     console.log(err);
   }
@@ -157,3 +167,6 @@ async function verifyJwt(token) {
     throw err;
   }
 }
+
+module.exports.io = () => ioInstance;
+module.exports.onlineUsers = () => onlineUsers;
