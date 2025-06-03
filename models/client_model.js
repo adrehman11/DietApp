@@ -21,6 +21,7 @@ var UserSchema = new mongoose.Schema({
     workout_plan_status: {type: String,default :Plan_Status.FirstPlanNeeded},
     subscription_status: {type: String,default :Subscription_Status.NotStarted},
     fcmToken: {type: String},
+    platForm: {type: String},
 },
 { timestamps: true });
 

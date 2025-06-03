@@ -491,3 +491,16 @@ exports.GetChatByTicketId = async function (req, res)
     return res.status(500).json({ message: "Internal Server Error", error: err });
   }
 };
+
+exports.editFcm = async function (req, res) 
+{
+  try {
+    let client = req.user
+    //update req.body for user
+    await User.updateOne({ _id: client._id }, { fcmToken: req.body.fcmToken,platForm : req.body.platForm })
+    return res.status(200).json({msg:"Fcm Token Updated"});
+
+  } catch (err) {
+    return res.status(500).json({ message: "Internal Server Error", error: err });
+  }
+};

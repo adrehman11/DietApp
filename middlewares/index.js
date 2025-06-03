@@ -1033,3 +1033,17 @@ exports.changeSubscriptionTypeByClientId = (req, res, next) => {
     next();
   }
 };
+const editFcmScehma = JOI.object().keys({
+  fcmToken: JOI.string().required(),
+  platForm: JOI.string().required(),
+});
+
+exports.editFcm = (req, res, next) => {
+  const result = editFcmScehma.validate(req.body);
+  if (result.error) {
+    return res.status(400).json({ msg: result.error.message });
+  } else {
+    next();
+  }
+};
+
