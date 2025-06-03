@@ -6,7 +6,7 @@ const { Coach } = require("../../models/coach_model");
 const { Roles } = require("../../Helpers/constants");
 const JWT = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
-
+const {sendCustomNotification} = require("../../firebase/firebase")
 const mongoose = require("mongoose");
 const { io, onlineUsers } = require("../../utility/websocket");
 
@@ -136,14 +136,19 @@ exports.chatOnTicket = async function (req, res) {
     await SupportTicketChat.create(req.body);
     let ticket = await SupportTicket.findOne({
       supportTicket_id: req.body.supportTicket_id,
-    });
-    const userId = ticket.client_id.toString();
-    const userSocketId = onlineUsers().get(userId);
-    if (userSocketId) {
-      io().to(userSocketId).emit("Notification", {
-        message: `Your have a new message on support ticket `,
-        timestamp: new Date(),
-      });
+    }).populate("client_id", "fcmToken");
+    // const userId = ticket.client_id.toString();
+    // const userSocketId = onlineUsers().get(userId);
+    // if (userSocketId) {
+    //   io().to(userSocketId).emit("Notification", {
+    //     message: `Your have a new message on support ticket `,
+    //     timestamp: new Date(),
+    //   });
+    // }
+    if(ticket.client_id.fcmToken)
+    {
+      await sendCustomNotification("New Message on Support Ticket","You have a new message on your support ticket.", ticket.client_id.fcmToken);
+
     }
     return res.status(200).json({ message: "Response submitted" });
   } catch (err) {

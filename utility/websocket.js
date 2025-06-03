@@ -8,7 +8,7 @@ const { Message } = require("../models/message_model");
 const socketAuth = require("socketio-auth");
 const JWT = require("jsonwebtoken");
 const { Roles } = require("../Helpers/constants");
-
+const {sendCustomNotification} = require("../firebase/firebase");
 let onlineUsers = new Map();
 let ioInstance;
 module.exports.socketsConnection = async (server) => {
@@ -84,11 +84,21 @@ module.exports.socketsConnection = async (server) => {
                 const receiverSocketId = onlineUsers.get(
                   data.recieverId.toString()
                 );
-                io.to(receiverSocketId).emit("Notification", {
-                  message: `Your have a new chat message`,
-                  timestamp: new Date(),
-                });
+                let userData = User.findById(data.recieverId).select("fcmToken").lean();
+                if (userData && userData.fcmToken) {
+                  // Send notification to the receiver
+                  await sendCustomNotification(
+                    "New Message",
+                    "You have a new chat message",
+                    userData.fcmToken
+                  );
+                }
+                // io.to(receiverSocketId).emit("Notification", {
+                //   message: `Your have a new chat message`,
+                //   timestamp: new Date(),
+                // });
                 io.to(receiverSocketId).emit("newMessage", newMessage);
+                
               }
             }
           } catch (error) {

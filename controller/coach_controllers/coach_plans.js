@@ -6,6 +6,7 @@ const { WorkoutExercise } = require("../../models/workout_exercises_model");
 const { WorkoutPlan } = require("../../models/workoutPlan_model");
 const { Form } = require("../../models/form_model");
 const { io, onlineUsers } = require("../../utility/websocket");
+const { sendCustomNotification } = require("../../firebase/firebase");
 const {
   FoodMeals,
   FoodCategory,
@@ -106,14 +107,20 @@ exports.createDietPlan = async function (req, res) {
         { _id: req.body.client_id },
         { $set: { diet_plan_status: Plan_Status.AllReady } }
       );
-      const userId = req.body.client_id.toString();
-      const userSocketId = onlineUsers().get(userId);
-      if (userSocketId) {
-        io().to(userSocketId).emit("Notification", {
-          message: "Your new diet plan is now active.",
-          timestamp: new Date(),
-        });
-      }
+      let userData  = await User.findById(req.body.client_id).select("fcmToken").lean();
+      if(userData.fcmToken)
+        {
+          await sendCustomNotification ("New Diet Plan Activated", "Your new diet plan is now active.", userData.fcmToken);
+  
+        }
+      // const userId = req.body.client_id.toString();
+      // const userSocketId = onlineUsers().get(userId);
+      // if (userSocketId) {
+      //   io().to(userSocketId).emit("Notification", {
+      //     message: "Your new diet plan is now active.",
+      //     timestamp: new Date(),
+      //   });
+      // }
     }
     await DietPlan.create(req.body);
 
@@ -146,14 +153,20 @@ exports.editDietPlan = async function (req, res) {
         { _id: req.body.client_id },
         { $set: { diet_plan_status: Plan_Status.AllReady } }
       );
-      const userId = req.body.client_id.toString();
-      const userSocketId = onlineUsers().get(userId);
-      if (userSocketId) {
-        io().to(userSocketId).emit("Notification", {
-          message: "Your new diet plan is now active.",
-          timestamp: new Date(),
-        });
+      let userData  = await User.findById(req.body.client_id).select("fcmToken").lean();
+      if(userData.fcmToken)
+      {
+        await sendCustomNotification ("New Diet Plan Activated", "Your new diet plan is now active.", userData.fcmToken);
+
       }
+      // const userId = req.body.client_id.toString();
+      // const userSocketId = onlineUsers().get(userId);
+      // if (userSocketId) {
+      //   io().to(userSocketId).emit("Notification", {
+      //     message: "Your new diet plan is now active.",
+      //     timestamp: new Date(),
+      //   });
+      // }
     }
     const updatedDietPlan = await DietPlan.findByIdAndUpdate(
       id,

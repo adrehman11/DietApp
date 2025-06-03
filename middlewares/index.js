@@ -4,6 +4,7 @@ const { FoodMeals, FoodCategory, DietPlanStatus,ScheduleCheckInType, Roles,Plan_
 const loginSchema = JOI.object().keys({
   email: JOI.string().regex(/[a-z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-z0-9!#$%&'*+/=?^_`{|}~-]+\.[a-z0-9]{2,3}/).required(),
   password: JOI.string().required(),
+  fcmToken:JOI.string().optional().allow(""),
 });
 
 exports.login = (req, res, next) => {
@@ -19,6 +20,7 @@ const signupSchema = JOI.object().keys({
   password: JOI.string().required(),
   full_name: JOI.string().required(),
   gender: JOI.string().required(),
+  fcmToken: JOI.string().optional().allow(""),
 });
 
 exports.signup = (req, res, next) => {

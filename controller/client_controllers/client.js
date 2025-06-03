@@ -29,7 +29,7 @@ exports.signup = async function (req, res) {
       })
     }
     let passwordHash = await hash(req.body.password);
-    await User.create({ passwordHash: passwordHash, email: req.body.email, role: Roles.client, full_name: req.body.full_name, gender: req.body.gender })
+    await User.create({ passwordHash: passwordHash, email: req.body.email, role: Roles.client, full_name: req.body.full_name, gender: req.body.gender, fcmToken:req.body.fcmToken });
     let otpCode = await otp_code()
     let otpCode_timestamp = Date.now()
     await User.updateOne(
@@ -80,7 +80,7 @@ exports.login = async function (req, res) {
     }, secret, { expiresIn: '3650d' });
     const { passwordHash, otpCode, otpCode_timestamp, ...updatedData } = data;
     //login work
-    await User.updateOne({ _id: data._id }, { isLogin: true })
+    await User.updateOne({ _id: data._id }, { isLogin: true,fcmToken:req.body.fcmToken })
     let formdata = await Form.findOne({client_id:data._id})
     let subscriptionData = await Subscription.findOne({user_id:data._id}).select("paymentStatus subscriptionName currentPeriodStart currentPeriodEnd")
     return res.status(200).json({ token: token, isNewUser: data.isNewUser, userData: updatedData,formdata:formdata,subscriptionData:subscriptionData });
