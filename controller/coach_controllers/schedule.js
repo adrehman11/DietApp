@@ -1,10 +1,12 @@
 const { ScheduleCheckIn } = require("../../models/scheduleCheckIn_model");
+const { User } = require("../../models/client_model");
 const { Roles } = require("../../Helpers/constants");
 // const {FoodMeals,FoodCategory,DietPlanStatus,WorkoutPlanStatus} = require("../../Helpers/constants")
 // const {calculateTotalNutrientsForPlan} = require("../../Helpers/helperFunction")
 // const JWT = require("jsonwebtoken");
 const mongoose = require("mongoose");
-const { io, onlineUsers } = require("../../utility/websocket");
+// const { io, onlineUsers } = require("../../utility/websocket");
+const {sendCustomNotification} = require("../../firebase/firebase");
 
 
 exports.scheduleCheckIn = async function (req, res) {
@@ -19,14 +21,25 @@ exports.scheduleCheckIn = async function (req, res) {
     }
     req.body.status = "Incomplete";
     await ScheduleCheckIn.create(req.body);
-    const userId = req.body.client_id.toString();
-    const userSocketId = onlineUsers().get(userId);
-    if (userSocketId) {
-      io().to(userSocketId).emit("Notification", {
-        message: `Your Have new ${req.body.type} Check in scheduled  `,
-        timestamp: new Date(),
-      });
+    let userData = await User.findOne({
+      _id: req.body.client_id,
+    });
+    console.log(userData)
+    if (userData && userData.fcmToken) {
+      await  sendCustomNotification("New Check-in Scheduled",
+        `You have a new check-in scheduled on ${req.body.date}`,
+        userData.fcmToken
+      );
     }
+    
+    // const userId = req.body.client_id.toString();
+    // const userSocketId = onlineUsers().get(userId);
+    // if (userSocketId) {
+    //   io().to(userSocketId).emit("Notification", {
+    //     message: `Your Have new ${req.body.type} Check in scheduled  `,
+    //     timestamp: new Date(),
+    //   });
+    // }
     res.status(200).json({ msg: "Check in created" });
   } catch (err) {
     console.log(err);

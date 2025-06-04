@@ -1,25 +1,40 @@
-const firebase = require('firebase-admin');
+const admin = require('firebase-admin');
 
-var serviceAccount = require("./dietCheat.json");
-firebase.initializeApp({
-    credential: firebase.credential.cert(serviceAccount)
+const serviceAccount = require("./dietCheat.json");
+
+admin.initializeApp({
+  credential: admin.credential.cert(serviceAccount),
 });
 
+const messaging = admin.messaging();
 
-const messaging = firebase.messaging();
+const sendCustomNotification = async (title, description, token) => {
+  const message = {
+    token: token,
+    notification: {
+      title: title,
+      body: description,
+    },
+    android: {
+      notification: {
+        sound: 'default',
+      },
+    },
+    apns: {
+      payload: {
+        aps: {
+          sound: 'default',
+        },
+      },
+    },
+  };
 
-const sendCustomNotification = (title, description, token) => {
-    let payload = {
-        notification: {
-            title: title,
-            body: description,
-            sound: 'default'
-        }
-    }
-
-    messaging.sendToDevice(token, payload)
+  try {
+    const response = await messaging.send(message);
+    console.log('Successfully sent message:', response);
+  } catch (error) {
+    console.error('Error sending message:', error);
+  }
 };
 
-
 module.exports = { messaging, sendCustomNotification };
-
